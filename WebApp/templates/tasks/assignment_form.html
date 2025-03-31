@@ -1,0 +1,38 @@
+{% extends "tasks/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Edit Assignment - Task Manager
+    {% else %}
+        New Assignment - Task Manager
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <h2 class="mb-4">
+        {% if form.instance.pk %}
+            Edit Assignment
+        {% else %}
+            New Assignment
+        {% endif %}
+    </h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form|crispy }}
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">
+                {% if form.instance.pk %}
+                    Update Assignment
+                {% else %}
+                    Create Assignment
+                {% endif %}
+            </button>
+            <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

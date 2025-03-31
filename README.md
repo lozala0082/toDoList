@@ -1,11 +1,85 @@
-#  **To Do List Application:**
+#  **To Do List Application**
 
-This repository contains a project aimed at developing both a desktop and a web application for task management. The application will function as a to-do list, enabling users to add new tasks, mark tasks as completed, view previously completed tasks, and modify existing tasks.
- - 2 Main Parts:
-     - Desktop Application
-     - Website Application
+This is a unified task management application with both desktop and web interfaces that share the same SQLite database.
 
-The applications will follow a CRUD Method (Create, Read, Update, Delete)
+## Project Structure
+
+- **DesktopApp**: A Tkinter-based desktop application
+- **WebApp**: A Django-based web application
+- **shared_db**: Shared database access library used by both applications
+
+## Requirements
+
+- Python 3.8+
+- Dependencies listed in each application's requirements.txt
+
+## Setup Instructions
+
+### 1. Install Dependencies
+
+First, set up the shared database library:
+```
+cd shared_db
+pip install -r requirements.txt
+```
+
+For the desktop application:
+```
+cd DesktopApp
+pip install -r requirements.txt
+```
+
+For the web application:
+```
+cd WebApp
+pip install -r requirements.txt
+```
+
+### 2. Run Django Sync Command (REQUIRED)
+
+**IMPORTANT**: You MUST run the sync command to configure the database tables correctly:
+```
+cd WebApp
+python manage.py sync_db
+```
+
+If you get a table already exists error when running migrations, use this command instead of the standard migrate.
+
+### 3. Running the Applications
+
+**Desktop App:**
+```
+cd DesktopApp
+python main.py
+```
+
+**Web App:**
+```
+cd WebApp
+python manage.py runserver
+```
+
+## Troubleshooting
+
+- **"no such table: django_session" error**: Make sure you ran the sync_db command above.
+
+## Features
+
+- User registration and authentication
+- Task/assignment creation and management
+- Status updates for assignments
+- Admin user management
+- Shared SQLite database between desktop and web applications
+
+## Architecture
+
+Both applications use the same SQLite database file located in the shared_db directory. The desktop app uses the custom database manager from the shared_db library, while the web app uses Django's ORM to interact with the same tables.
+
+## Tables
+
+- `auth_user`: User information (compatible with Django's User model)
+- `tasks_assignment`: Assignment/task information
+- `tasks_assignment_assignees`: Many-to-many relationship between assignments and users
 
 # The apps should do the following...
 

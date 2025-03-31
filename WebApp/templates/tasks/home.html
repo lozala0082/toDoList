@@ -1,0 +1,94 @@
+{% extends "tasks/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Home - Task Manager{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <h2 class="mb-4">Assignments</h2>
+    
+    {% if assignments %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Creator</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assignment in assignments %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'assignment-detail' assignment.pk %}" class="text-decoration-none">
+                                    {{ assignment.name }}
+                                </a>
+                            </td>
+                            <td>{{ assignment.due_date|date:"M d, Y" }}</td>
+                            <td>
+                                <span class="assignment-status status-{{ assignment.status|lower|cut:" " }}">
+                                    {{ assignment.status }}
+                                </span>
+                            </td>
+                            <td>{{ assignment.creator.username }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'assignment-detail' assignment.pk %}" class="btn btn-sm btn-info">View</a>
+                                    {% if user.is_staff %}
+                                        <a href="{% url 'assignment-update' assignment.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                                        <a href="{% url 'assignment-delete' assignment.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                    {% endif %}
+                                    {% if user in assignment.assignees.all %}
+                                        <a href="{% url 'update-status' assignment.pk %}" class="btn btn-sm btn-success">Update Status</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <p class="text-muted">No assignments found.</p>
+    {% endif %}
+</div>
+{% endblock %} 

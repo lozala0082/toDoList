@@ -1,0 +1,67 @@
+{% extends "tasks/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ assignment.name }} - Task Manager{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ assignment.name }}</h2>
+        <span class="assignment-status status-{{ assignment.status|lower|cut:" " }}">
+            {{ assignment.status }}
+        </span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Description</h5>
+                    <p class="card-text">{{ assignment.description }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Details</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>Due Date:</strong> {{ assignment.due_date|date:"M d, Y" }}</li>
+                        <li><strong>Created by:</strong> {{ assignment.creator.username }}</li>
+                        <li><strong>Created on:</strong> {{ assignment.created_at|date:"M d, Y H:i" }}</li>
+                        <li><strong>Last updated:</strong> {{ assignment.updated_at|date:"M d, Y H:i" }}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Assignees</h5>
+                    {% if assignment.assignees.all %}
+                        <ul class="list-unstyled">
+                            {% for assignee in assignment.assignees.all %}
+                                <li>{{ assignee.username }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No assignees</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <div class="btn-group" role="group">
+            {% if user.is_staff %}
+                <a href="{% url 'assignment-update' assignment.pk %}" class="btn btn-warning">Edit Assignment</a>
+                <a href="{% url 'assignment-delete' assignment.pk %}" class="btn btn-danger">Delete Assignment</a>
+            {% endif %}
+            {% if user in assignment.assignees.all %}
+                <a href="{% url 'update-status' assignment.pk %}" class="btn btn-success">Update Status</a>
+            {% endif %}
+            <a href="{% url 'home' %}" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 
