@@ -3,92 +3,103 @@
 
 {% block title %}Home - Task Manager{% endblock %}
 
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Literata:wght@600&display=swap" rel="stylesheet">
+<style>
+    .main-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        background: #B0E0F4;
+        overflow: hidden;
+        min-height: 100vh;
+        padding: 20px;
+    }
+    .welcome-text {
+        color: black;
+        font-size: 60px;
+        font-family: 'Irish Grover', cursive;
+        font-weight: 400;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    .section-title {
+        color: black;
+        font-size: 50px;
+        font-family: 'Irish Grover', cursive;
+        font-weight: 400;
+        margin-bottom: 30px;
+    }
+    .task-container {
+        width: 361px;
+        height: 80px;
+        padding: 2px;
+        position: relative;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        display: inline-flex;
+        margin: 10px;
+    }
+    .task-checkbox {
+        width: 42px;
+        height: 40px;
+        background: #D8E1E3;
+        border-radius: 8px;
+        border: 2px #396B76 solid;
+    }
+    .task-text {
+        color: black;
+        font-size: 20px;
+        font-family: 'Literata', serif;
+        font-weight: 600;
+    }
+    .section-container {
+        margin-bottom: 40px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="content-section">
-    <h2 class="mb-4">Assignments</h2>
+<div class="main-container">
+    <div class="welcome-text">WELCOME BACK!</div>
     
-    {% if assignments %}
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Due Date</th>
-                        <th>Status</th>
-                        <th>Creator</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for assignment in assignments %}
-                        <tr>
-                            <td>
-                                <a href="{% url 'assignment-detail' assignment.pk %}" class="text-decoration-none">
-                                    {{ assignment.name }}
-                                </a>
-                            </td>
-                            <td>{{ assignment.due_date|date:"M d, Y" }}</td>
-                            <td>
-                                <span class="assignment-status status-{{ assignment.status|lower|cut:" " }}">
-                                    {{ assignment.status }}
-                                </span>
-                            </td>
-                            <td>{{ assignment.creator.username }}</td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <a href="{% url 'assignment-detail' assignment.pk %}" class="btn btn-sm btn-info">View</a>
-                                    {% if user.is_staff %}
-                                        <a href="{% url 'assignment-update' assignment.pk %}" class="btn btn-sm btn-warning">Edit</a>
-                                        <a href="{% url 'assignment-delete' assignment.pk %}" class="btn btn-sm btn-danger">Delete</a>
-                                    {% endif %}
-                                    {% if user in assignment.assignees.all %}
-                                        <a href="{% url 'update-status' assignment.pk %}" class="btn btn-sm btn-success">Update Status</a>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="section-container">
+                <div class="section-title">Today's To Do's</div>
+                {% for assignment in today_assignments %}
+                <div class="task-container">
+                    <div class="task-checkbox"></div>
+                    <div class="task-text">{{ assignment.name }}</div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
-
-        {% if is_paginated %}
-            <nav aria-label="Page navigation" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    {% if page_obj.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page=1">First</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                        </li>
-                    {% endif %}
-
-                    {% for num in page_obj.paginator.page_range %}
-                        {% if page_obj.number == num %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if page_obj.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        {% endif %}
-    {% else %}
-        <p class="text-muted">No assignments found.</p>
-    {% endif %}
+        
+        <div class="col-md-4">
+            <div class="section-container">
+                <div class="section-title">Weekly Works</div>
+                {% for assignment in weekly_assignments %}
+                <div class="task-container">
+                    <div class="task-checkbox"></div>
+                    <div class="task-text">{{ assignment.name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="section-container">
+                <div class="section-title">Monthly Madness</div>
+                {% for assignment in monthly_assignments %}
+                <div class="task-container">
+                    <div class="task-checkbox"></div>
+                    <div class="task-text">{{ assignment.name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %} 

@@ -4,6 +4,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.utils import timezone
+from datetime import timedelta
 from .models import Assignment
 from .forms import AssignmentForm, AssignmentStatusForm, UserRegistrationForm
 
@@ -21,6 +23,30 @@ class HomeView(LoginRequiredMixin, ListView):
         if self.request.user.is_staff:
             return Assignment.objects.all()
         return Assignment.objects.filter(assignees=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        today = timezone.now().date()
+        week_start = today - timedelta(days=today.weekday())
+        month_start = today.replace(day=1)
+
+        base_queryset = self.get_queryset()
+
+        context['today_assignments'] = base_queryset.filter(
+            due_date__date=today
+        ).order_by('due_date')
+
+        context['weekly_assignments'] = base_queryset.filter(
+            due_date__date__gte=week_start,
+            due_date__date__lt=week_start + timedelta(days=7)
+        ).order_by('due_date')
+
+        context['monthly_assignments'] = base_queryset.filter(
+            due_date__date__gte=month_start,
+            due_date__date__lt=month_start + timedelta(days=32)
+        ).order_by('due_date')
+
+        return context
 
 class AssignmentDetailView(LoginRequiredMixin, DetailView):
     model = Assignment
