@@ -33,17 +33,19 @@ class HomeView(LoginRequiredMixin, ListView):
         base_queryset = self.get_queryset()
 
         context['today_assignments'] = base_queryset.filter(
-            due_date__date=today
+            due_date__year=today.year,
+            due_date__month=today.month,
+            due_date__day=today.day
         ).order_by('due_date')
 
         context['weekly_assignments'] = base_queryset.filter(
-            due_date__date__gte=week_start,
-            due_date__date__lt=week_start + timedelta(days=7)
+            due_date__gte=week_start,
+            due_date__lt=week_start + timedelta(days=7)
         ).order_by('due_date')
 
         context['monthly_assignments'] = base_queryset.filter(
-            due_date__date__gte=month_start,
-            due_date__date__lt=month_start + timedelta(days=32)
+            due_date__gte=month_start,
+            due_date__lt=month_start + timedelta(days=32)
         ).order_by('due_date')
 
         return context
