@@ -3,92 +3,450 @@
 
 {% block title %}Home - Task Manager{% endblock %}
 
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+    :root {
+        /* Material 3 color tokens */
+        --md-primary: #6750A4;
+        --md-on-primary: #FFFFFF;
+        --md-primary-container: #EADDFF;
+        --md-on-primary-container: #21005E;
+        --md-secondary: #625B71;
+        --md-on-secondary: #FFFFFF;
+        --md-secondary-container: #E8DEF8;
+        --md-on-secondary-container: #1E192B;
+        --md-tertiary: #7D5260;
+        --md-on-tertiary: #FFFFFF;
+        --md-tertiary-container: #FFD8E4;
+        --md-on-tertiary-container: #31111D;
+        --md-error: #B3261E;
+        --md-on-error: #FFFFFF;
+        --md-error-container: #F9DEDC;
+        --md-on-error-container: #410E0B;
+        --md-background: #FFFBFE;
+        --md-on-background: #1C1B1F;
+        --md-surface: #FFFBFE;
+        --md-on-surface: #1C1B1F;
+        --md-surface-variant: #E7E0EC;
+        --md-on-surface-variant: #49454F;
+        --md-outline: #79747E;
+        --md-outline-variant: #CAC4D0;
+        --md-shadow: #000000;
+        --md-scrim: #000000;
+        --md-inverse-surface: #313033;
+        --md-inverse-on-surface: #F4EFF4;
+        --md-inverse-primary: #D0BCFF;
+        --md-surface-dim: #F8F8F8;
+        --md-surface-bright: #FFFBFE;
+        --md-surface-container-lowest: #FFFFFF;
+        --md-surface-container-low: #F7F2FA;
+        --md-surface-container: #F3EDF7;
+        --md-surface-container-high: #ECE6F0;
+        --md-surface-container-highest: #E6E1E5;
+    }
+
+    body {
+        background-color: var(--md-surface-dim);
+        color: var(--md-on-surface);
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    .main-container {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        min-height: 100vh;
+    }
+
+    .sidebar {
+        background-color: var(--md-surface);
+        padding: 16px;
+        border-right: 1px solid var(--md-outline-variant);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sidebar-logo {
+        color: var(--md-on-surface);
+        font-size: 24px;
+        font-weight: 500;
+        margin-bottom: 24px;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .nav-item {
+        color: var(--md-on-surface-variant);
+        padding: 12px 16px;
+        margin: 4px 0;
+        border-radius: 28px;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+    }
+
+    .nav-item:hover {
+        background-color: var(--md-surface-container-high);
+        color: var(--md-on-surface);
+    }
+
+    .nav-item.active {
+        color: var(--md-on-primary-container);
+        background-color: var(--md-primary-container);
+    }
+
+    .content-area {
+        background-color: var(--md-surface-dim);
+        padding: 24px 32px;
+        overflow-y: auto;
+    }
+
+    .welcome-section {
+        margin-bottom: 32px;
+    }
+
+    .welcome-text {
+        font-size: 28px;
+        font-weight: 400;
+        margin-bottom: 8px;
+        color: var(--md-on-surface);
+    }
+
+    .section-title {
+        font-size: 22px;
+        font-weight: 500;
+        margin: 24px 0 16px;
+        color: var(--md-on-surface);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .task-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .task-card {
+        background-color: var(--md-surface);
+        padding: 16px;
+        border-radius: 16px;
+        transition: box-shadow 0.2s, transform 0.2s;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .task-card:hover {
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        transform: translateY(-2px);
+    }
+
+    .task-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .task-checkbox {
+        width: 24px;
+        height: 24px;
+        border: 2px solid var(--md-outline);
+        border-radius: 4px;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .task-checkbox.checked::after {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 2px;
+        width: 6px;
+        height: 12px;
+        border: solid var(--md-primary);
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .task-text {
+        color: var(--md-on-surface);
+        font-size: 16px;
+        font-weight: 500;
+        flex-grow: 1;
+    }
+
+    .task-due-date {
+        color: var(--md-on-surface-variant);
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 500;
+        gap: 4px;
+    }
+
+    .status-pending {
+        background-color: var(--md-tertiary-container);
+        color: var(--md-on-tertiary-container);
+    }
+
+    .status-in-progress {
+        background-color: var(--md-secondary-container);
+        color: var(--md-on-secondary-container);
+    }
+
+    .status-completed {
+        background-color: var(--md-primary-container);
+        color: var(--md-on-primary-container);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .action-button {
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+    }
+
+    .action-button.view {
+        background-color: var(--md-secondary-container);
+        color: var(--md-on-secondary-container);
+    }
+
+    .action-button.edit {
+        background-color: var(--md-tertiary-container);
+        color: var(--md-on-tertiary-container);
+    }
+
+    .action-button.delete {
+        background-color: var(--md-error-container);
+        color: var(--md-on-error-container);
+    }
+
+    .action-button.update {
+        background-color: var(--md-primary-container);
+        color: var(--md-on-primary-container);
+    }
+
+    .material-icons {
+        font-size: 18px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="content-section">
-    <h2 class="mb-4">Assignments</h2>
-    
-    {% if assignments %}
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Due Date</th>
-                        <th>Status</th>
-                        <th>Creator</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for assignment in assignments %}
-                        <tr>
-                            <td>
-                                <a href="{% url 'assignment-detail' assignment.pk %}" class="text-decoration-none">
-                                    {{ assignment.name }}
-                                </a>
-                            </td>
-                            <td>{{ assignment.due_date|date:"M d, Y" }}</td>
-                            <td>
-                                <span class="assignment-status status-{{ assignment.status|lower|cut:" " }}">
-                                    {{ assignment.status }}
-                                </span>
-                            </td>
-                            <td>{{ assignment.creator.username }}</td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <a href="{% url 'assignment-detail' assignment.pk %}" class="btn btn-sm btn-info">View</a>
-                                    {% if user.is_staff %}
-                                        <a href="{% url 'assignment-update' assignment.pk %}" class="btn btn-sm btn-warning">Edit</a>
-                                        <a href="{% url 'assignment-delete' assignment.pk %}" class="btn btn-sm btn-danger">Delete</a>
-                                    {% endif %}
-                                    {% if user in assignment.assignees.all %}
-                                        <a href="{% url 'update-status' assignment.pk %}" class="btn btn-sm btn-success">Update Status</a>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="main-container">
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <span class="material-icons">check_circle</span>
+            Task Manager
+        </div>
+        <a href="#" class="nav-item active">
+            <span class="material-icons">home</span>
+            Home
+        </a>
+        <a href="#" class="nav-item">
+            <span class="material-icons">today</span>
+            Today's Tasks
+        </a>
+        <a href="#" class="nav-item">
+            <span class="material-icons">view_week</span>
+            Weekly View
+        </a>
+        <a href="#" class="nav-item">
+            <span class="material-icons">calendar_month</span>
+            Monthly View
+        </a>
+        <a href="#" class="nav-item">
+            <span class="material-icons">task_alt</span>
+            Completed
+        </a>
+    </div>
+
+    <div class="content-area">
+        <div class="welcome-section">
+            <div class="welcome-text">Welcome back, {{ user.username }}!</div>
         </div>
 
-        {% if is_paginated %}
-            <nav aria-label="Page navigation" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    {% if page_obj.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page=1">First</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                        </li>
+        <div class="section-title">
+            <span class="material-icons">today</span>
+            Today's To Do's
+        </div>
+        <div class="task-grid">
+            {% for assignment in today_assignments %}
+            <div class="task-card">
+                <div class="task-header">
+                    <div class="task-checkbox {% if assignment.status == 'Completed' %}checked{% endif %}"></div>
+                    <div class="task-text">{{ assignment.name }}</div>
+                </div>
+                <div class="task-due-date">
+                    <span class="material-icons" style="font-size: 16px;">schedule</span>
+                    Due: {{ assignment.due_date|date:"M d, Y" }}
+                </div>
+                <div class="status-badge status-{{ assignment.status|lower|cut:" " }}">
+                    <span class="material-icons" style="font-size: 16px;">
+                        {% if assignment.status == 'Pending' %}hourglass_empty
+                        {% elif assignment.status == 'In Progress' %}pending
+                        {% else %}check_circle{% endif %}
+                    </span>
+                    {{ assignment.status }}
+                </div>
+                <div class="action-buttons">
+                    <a href="{% url 'assignment-detail' assignment.pk %}" class="action-button view">
+                        <span class="material-icons" style="font-size: 16px;">visibility</span>
+                        View
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'assignment-update' assignment.pk %}" class="action-button edit">
+                        <span class="material-icons" style="font-size: 16px;">edit</span>
+                        Edit
+                    </a>
+                    <a href="{% url 'assignment-delete' assignment.pk %}" class="action-button delete">
+                        <span class="material-icons" style="font-size: 16px;">delete</span>
+                        Delete
+                    </a>
                     {% endif %}
-
-                    {% for num in page_obj.paginator.page_range %}
-                        {% if page_obj.number == num %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if page_obj.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
-                        </li>
+                    {% if user in assignment.assignees.all %}
+                    <a href="{% url 'update-status' assignment.pk %}" class="action-button update">
+                        <span class="material-icons" style="font-size: 16px;">update</span>
+                        Update
+                    </a>
                     {% endif %}
-                </ul>
-            </nav>
-        {% endif %}
-    {% else %}
-        <p class="text-muted">No assignments found.</p>
-    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="section-title">
+            <span class="material-icons">view_week</span>
+            Weekly Works
+        </div>
+        <div class="task-grid">
+            {% for assignment in weekly_assignments %}
+            <div class="task-card">
+                <div class="task-header">
+                    <div class="task-checkbox {% if assignment.status == 'Completed' %}checked{% endif %}"></div>
+                    <div class="task-text">{{ assignment.name }}</div>
+                </div>
+                <div class="task-due-date">
+                    <span class="material-icons" style="font-size: 16px;">schedule</span>
+                    Due: {{ assignment.due_date|date:"M d, Y" }}
+                </div>
+                <div class="status-badge status-{{ assignment.status|lower|cut:" " }}">
+                    <span class="material-icons" style="font-size: 16px;">
+                        {% if assignment.status == 'Pending' %}hourglass_empty
+                        {% elif assignment.status == 'In Progress' %}pending
+                        {% else %}check_circle{% endif %}
+                    </span>
+                    {{ assignment.status }}
+                </div>
+                <div class="action-buttons">
+                    <a href="{% url 'assignment-detail' assignment.pk %}" class="action-button view">
+                        <span class="material-icons" style="font-size: 16px;">visibility</span>
+                        View
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'assignment-update' assignment.pk %}" class="action-button edit">
+                        <span class="material-icons" style="font-size: 16px;">edit</span>
+                        Edit
+                    </a>
+                    <a href="{% url 'assignment-delete' assignment.pk %}" class="action-button delete">
+                        <span class="material-icons" style="font-size: 16px;">delete</span>
+                        Delete
+                    </a>
+                    {% endif %}
+                    {% if user in assignment.assignees.all %}
+                    <a href="{% url 'update-status' assignment.pk %}" class="action-button update">
+                        <span class="material-icons" style="font-size: 16px;">update</span>
+                        Update
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="section-title">
+            <span class="material-icons">calendar_month</span>
+            Monthly Madness
+        </div>
+        <div class="task-grid">
+            {% for assignment in monthly_assignments %}
+            <div class="task-card">
+                <div class="task-header">
+                    <div class="task-checkbox {% if assignment.status == 'Completed' %}checked{% endif %}"></div>
+                    <div class="task-text">{{ assignment.name }}</div>
+                </div>
+                <div class="task-due-date">
+                    <span class="material-icons" style="font-size: 16px;">schedule</span>
+                    Due: {{ assignment.due_date|date:"M d, Y" }}
+                </div>
+                <div class="status-badge status-{{ assignment.status|lower|cut:" " }}">
+                    <span class="material-icons" style="font-size: 16px;">
+                        {% if assignment.status == 'Pending' %}hourglass_empty
+                        {% elif assignment.status == 'In Progress' %}pending
+                        {% else %}check_circle{% endif %}
+                    </span>
+                    {{ assignment.status }}
+                </div>
+                <div class="action-buttons">
+                    <a href="{% url 'assignment-detail' assignment.pk %}" class="action-button view">
+                        <span class="material-icons" style="font-size: 16px;">visibility</span>
+                        View
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'assignment-update' assignment.pk %}" class="action-button edit">
+                        <span class="material-icons" style="font-size: 16px;">edit</span>
+                        Edit
+                    </a>
+                    <a href="{% url 'assignment-delete' assignment.pk %}" class="action-button delete">
+                        <span class="material-icons" style="font-size: 16px;">delete</span>
+                        Delete
+                    </a>
+                    {% endif %}
+                    {% if user in assignment.assignees.all %}
+                    <a href="{% url 'update-status' assignment.pk %}" class="action-button update">
+                        <span class="material-icons" style="font-size: 16px;">update</span>
+                        Update
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 {% endblock %} 
