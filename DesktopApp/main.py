@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from tkinter import *
+from PIL import Image, ImageTk  # pip install pillow
 from datetime import datetime
 import sys
 import os
@@ -15,8 +17,7 @@ from shared_db.db_manager import DatabaseManager, ASSIGNMENT_STATUSES
 
 # App configuration
 APP_TITLE = "Task Management System"
-APP_VERSION = "1.0.0"
-LOGIN_WINDOW_SIZE = "400x300"
+APP_VERSION = "1.0.5"
 MAIN_WINDOW_SIZE = "800x600"
 ASSIGNMENT_WINDOW_SIZE = "600x400"
 
@@ -29,50 +30,132 @@ class TaskManagementApp:
         self.show_login()
 
     def show_login(self):
+        # Clears anything before getting into this new function
         self.clear_window()
-        self.root.geometry(LOGIN_WINDOW_SIZE)
+        # Brings the window to fullscreen
+        self.root.state('zoomed')  # This simulates the maximize button being clicked
 
-        # Login Frame
-        login_frame = ttk.Frame(self.root, padding="20")
-        login_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        # Name of Application Widget
+        # -------------------------------------------------------------------------
+        name_label = Label(self.root, text="The To Do List", font=("Comic Sans MS", 40, "bold"))
+        name_label.place(x=400, y=200)
+        # -------------------------------------------------------------------------
 
-        ttk.Label(login_frame, text="Login", font=('Helvetica', 16, 'bold')).grid(row=0, column=0, columnspan=2, pady=10)
+        # Logo Image Widget
+        # -------------------------------------------------------------------------
 
-        ttk.Label(login_frame, text="Username:").grid(row=1, column=0, pady=5)
-        username_entry = ttk.Entry(login_frame)
-        username_entry.grid(row=1, column=1, pady=5)
+        self.logoimage = Image.open(os.path.join(os.path.dirname(__file__), "todolist.png"))  # Using correct path
+        self.logoimage = self.logoimage.resize((100, 100), Image.Resampling.LANCZOS)
 
-        ttk.Label(login_frame, text="Password:").grid(row=2, column=0, pady=5)
-        password_entry = ttk.Entry(login_frame, show="*")
-        password_entry.grid(row=2, column=1, pady=5)
+        # Convert the image to a Tkinter-compatible format
+        self.logophoto = ImageTk.PhotoImage(self.logoimage)
 
-        ttk.Button(login_frame, text="Login", command=lambda: self.login(username_entry.get(), password_entry.get())).grid(row=3, column=0, columnspan=2, pady=10)
-        ttk.Button(login_frame, text="Register", command=self.show_register).grid(row=4, column=0, columnspan=2, pady=5)
+        # Create a Label widget to hold the image
+        logo_pic_label = Label(self.root, image=self.logophoto)
+        logo_pic_label.place(x=800, y=188)
+        # -------------------------------------------------------------------------
+
+        # Boss Image Widget
+        # -------------------------------------------------------------------------
+        self.bossimage = Image.open(os.path.join(os.path.dirname(__file__), "bosscat.png"))
+        self.bossimage = self.bossimage.resize((200, 200), Image.Resampling.LANCZOS)
+
+        # Convert the image to a Tkinter-compatible format
+        self.bossphoto = ImageTk.PhotoImage(self.bossimage)
+
+        # Create a Label widget to hold the image
+        boss_pic_label = Label(self.root, image=self.bossphoto)
+        boss_pic_label.place(x=-5, y=470)
+        # -------------------------------------------------------------------------
+
+        # Textbox Image Widget
+        # -------------------------------------------------------------------------
+        self.textboximage = Image.open(os.path.join(os.path.dirname(__file__), "textbox.png"))
+        self.textboximage = self.textboximage.resize((200, 200), Image.Resampling.LANCZOS)
+
+        # Convert the image to a Tkinter-compatible format
+        self.textphoto = ImageTk.PhotoImage(self.textboximage)
+
+        # Create a Label widget to hold the image
+        text_pic_label = Label(self.root, image=self.textphoto)
+        text_pic_label.place(x=200, y=380)
+        # -------------------------------------------------------------------------
+
+        # Username and password login
+        # -------------------------------------------------------------------------
+        username_label = Label(self.root, text="Username:", font=("Arial", 14))
+        username_label.place(x=500, y=300)
+
+        username_entry = Entry(self.root, font=("Arial", 14), width=20)
+        username_entry.place(x=600, y=300)
+
+        password_label = Label(self.root, text="Password:", font=("Arial", 14))
+        password_label.place(x=500, y=350)
+
+        password_entry = Entry(self.root, font=("Arial", 14), width=20, show="*")  # 'show' hides the password
+        password_entry.place(x=600, y=350)
+
+
+        # Create the Login button
+        # -------------------------------------------------------------------------
+        login_button = Button(self.root, text="Login", font=("Arial", 14), command=lambda: self.login(username_entry.get(), password_entry.get()))
+        login_button.place(x=500, y=400)
+        # -------------------------------------------------------------------------
+
+
+        # Create user account
+        # -------------------------------------------------------------------------
+        # Create the create button
+        create_button = Button(self.root, text="Create New Account", font=("Arial", 14), command=self.show_register)
+        create_button.place(x=600, y=400)
+        # -------------------------------------------------------------------------
 
     def show_register(self):
         self.clear_window()
-        self.root.geometry(LOGIN_WINDOW_SIZE)
+        # Brings the window to fullscreen
+        self.root.state('zoomed')  # This simulates the maximize button being clicked
 
-        # Register Frame
-        register_frame = ttk.Frame(self.root, padding="20")
-        register_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        create_message_label = Label(self.root, text="Enter Your Information Below:", font=("Comic Sans MS", 30, "bold"))
+        create_message_label.place(x=380, y=200)
 
-        ttk.Label(register_frame, text="Register", font=('Helvetica', 16, 'bold')).grid(row=0, column=0, columnspan=2, pady=10)
+        #firstname_label = Label(self.root, text="First Name:", font=("Arial", 14))
+        #firstname_label.place(x=500, y=350)
 
-        ttk.Label(register_frame, text="Username:").grid(row=1, column=0, pady=5)
-        username_entry = ttk.Entry(register_frame)
-        username_entry.grid(row=1, column=1, pady=5)
+        #first_name_entry = Entry(self.root, font=("Arial", 14), width=20)
+        #first_name_entry.place(x=660, y=350)
 
-        ttk.Label(register_frame, text="Password:").grid(row=2, column=0, pady=5)
-        password_entry = ttk.Entry(register_frame, show="*")
-        password_entry.grid(row=2, column=1, pady=5)
+        #lastname_label = Label(self.root, text="Last Name:", font=("Arial", 14))
+        #lastname_label.place(x=500, y=400)
 
-        ttk.Label(register_frame, text="Confirm Password:").grid(row=3, column=0, pady=5)
-        confirm_password_entry = ttk.Entry(register_frame, show="*")
-        confirm_password_entry.grid(row=3, column=1, pady=5)
+        #last_name_entry = Entry(self.root, font=("Arial", 14), width=20)
+        #last_name_entry.place(x=660, y=400)
 
-        ttk.Button(register_frame, text="Register", command=lambda: self.register(username_entry.get(), password_entry.get(), confirm_password_entry.get())).grid(row=4, column=0, columnspan=2, pady=10)
-        ttk.Button(register_frame, text="Back to Login", command=self.show_login).grid(row=5, column=0, columnspan=2, pady=5)
+        create_user_label = Label(self.root, text="Create Username:", font=("Arial", 14))
+        create_user_label.place(x=480, y=300)
+
+        create_user_entry = Entry(self.root, font=("Arial", 14), width=20)
+        create_user_entry.place(x=650, y=300)
+
+        create_psswrd_label = Label(self.root, text="Create Password:", font=("Arial", 14))
+        create_psswrd_label.place(x=480, y=350)
+
+        create_psswrd_entry = Entry(self.root, font=("Arial", 14), width=20, show='*')
+        create_psswrd_entry.place(x=650, y=350)
+
+        confirm_psswrd_label = Label(self.root, text="Confirm Password:", font=("Arial", 14))
+        confirm_psswrd_label.place(x=480, y=400)
+
+        confirm_psswrd_entry = Entry(self.root, font=("Arial", 14), width=20, show='*')
+        confirm_psswrd_entry.place(x=650, y=400)
+
+        # Send the info to create_accounts function so it can append the info to the sql database
+        register_account_button = Button(self.root, text="Register Account", font=("Arial", 14), command=lambda: self.register(create_user_entry.get(), create_psswrd_entry.get(), confirm_psswrd_entry.get()))
+        register_account_button.place(x=710, y=450)
+
+        # Go Back to the main log in
+        go_back_button = Button(self.root, text="Go Back", font=("Arial", 14),command=self.show_login)
+        go_back_button.place(x=600, y=450)
+
 
     def show_main_window(self):
         self.clear_window()
@@ -85,7 +168,7 @@ class TaskManagementApp:
         # Header
         header_frame = ttk.Frame(main_frame)
         header_frame.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=5)
-        
+
         ttk.Label(header_frame, text=f"Welcome, {self.current_user['username']}!", font=('Helvetica', 12, 'bold')).pack(side=tk.LEFT)
         ttk.Button(header_frame, text="Logout", command=self.show_login).pack(side=tk.RIGHT)
 
@@ -96,14 +179,14 @@ class TaskManagementApp:
         # Create Treeview
         columns = ('ID', 'Name', 'Due Date', 'Status', 'Creator')
         self.tree = ttk.Treeview(list_frame, columns=columns, show='headings')
-        
+
         # Set column headings
         for col in columns:
             self.tree.heading(col, text=col)
             self.tree.column(col, width=100)
 
         self.tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        
+
         # Add scrollbar
         scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.tree.yview)
         scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
@@ -256,14 +339,14 @@ class TaskManagementApp:
         # Create Treeview
         columns = ('ID', 'Username', 'Role')
         user_tree = ttk.Treeview(user_frame, columns=columns, show='headings')
-        
+
         # Set column headings
         for col in columns:
             user_tree.heading(col, text=col)
             user_tree.column(col, width=100)
 
         user_tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        
+
         # Add scrollbar
         scrollbar = ttk.Scrollbar(user_frame, orient=tk.VERTICAL, command=user_tree.yview)
         scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
@@ -323,14 +406,14 @@ class TaskManagementApp:
             due_date = assignment[2].strftime('%Y-%m-%d')  # due date is the third column
             status = assignment[4]         # status is the fifth column
             creator_name = assignment[-1]  # creator_name is the last column added in the query
-            
+
             self.tree.insert('', tk.END, values=(assignment_id, name, due_date, status, creator_name))
 
     def login(self, username, password):
         if not username or not password:
             messagebox.showerror("Error", "Please fill in all fields!")
             return
-        
+
         user_data = self.db.verify_user(username, password)
         if user_data:
             self.current_user = {
@@ -346,11 +429,11 @@ class TaskManagementApp:
         if not username or not password or not confirm_password:
             messagebox.showerror("Error", "Please fill in all fields!")
             return
-        
+
         if password != confirm_password:
             messagebox.showerror("Error", "Passwords do not match!")
             return
-        
+
         try:
             self.db.create_user(username, password)
             messagebox.showinfo("Success", "Registration successful! You can now login.")
@@ -361,6 +444,8 @@ class TaskManagementApp:
             else:
                 messagebox.showerror("Error", f"Registration failed: {str(e)}")
 
+
+    # This function removes any previous windows
     def clear_window(self):
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -370,4 +455,4 @@ class TaskManagementApp:
 
 if __name__ == "__main__":
     app = TaskManagementApp()
-    app.run() 
+    app.run()
