@@ -1,29 +1,184 @@
 {% extends "tasks/base.html" %}
-{% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}Register - Task Manager{% endblock %}
 
+{% block page_title %}Register{% endblock %} {# Sets the title in the Top App Bar #}
+
+{% block extra_head %}
+<style>
+    .register-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(
+            100vh - 120px
+        ); /* Adjust based on top-app-bar height */
+        padding: 16px;
+    }
+
+    /* Cat image styling */
+    .bosscat-image {
+        max-width: 200px;
+        margin-bottom: 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .register-card {
+        width: 100%;
+        max-width: 450px; /* Slightly wider potentially */
+        padding: 24px;
+    }
+    .register-card h2 {
+        margin-bottom: 24px;
+        text-align: center;
+    }
+    .form-field-container {
+        margin-bottom: var(--form-field-margin-bottom);
+    }
+    /* M3 Text Fields require width */
+    .mdc-text-field {
+        width: 100%;
+    }
+    .submit-button-container {
+        margin-top: 24px;
+        display: flex;
+        justify-content: center; /* Center button */
+    }
+    .login-link-container {
+        margin-top: 16px;
+        text-align: center;
+    }
+    .mdc-button--text {
+        /* Style for the login link */
+        --mdc-theme-primary: var(--mdc-theme-primary);
+    }
+    .errorlist {
+        /* Basic styling for Django form errors */
+        color: var(--mdc-theme-error, #b00020);
+        font-size: 0.8em;
+        list-style: none;
+        padding: 0;
+        margin-top: 4px;
+    }
+    /* Style specifically for help text */
+    .mdc-text-field-helper-text--persistent {
+        font-size: 0.75rem;
+        color: rgba(0, 0, 0, 0.6); /* Default M3 helper text color */
+    }
+
+    /* Using floating labels instead of placeholders */
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="content-section">
-            <h2 class="mb-4">Register</h2>
+<div class="register-container">
+    <img src="{% static 'images/bosscat.png' %}" alt="Boss Cat" class="bosscat-image">
+    <div class="mdc-card register-card mdc-card--outlined">
+        <h2 class="mdc-typography--headline5">Create Account</h2>
 
-            <form method="POST">
-                {% csrf_token %}
-                {{ form|crispy }}
-                
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">Register</button>
-                </div>
-            </form>
+        <form method="POST" novalidate>
+            {% csrf_token %}
 
-            <div class="mt-3">
-                <p class="text-muted">
-                    Already have an account? <a href="{% url 'login' %}" class="text-decoration-none">Login here</a>
-                </p>
+            {# Display non-field errors #}
+            {% if form.non_field_errors %}
+            <div class="errorlist form-field-container">
+                {% for error in form.non_field_errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
             </div>
+            {% endif %}
+
+            {# --- Render each field manually using M3 Text Field --- #}
+            {% for field in form.visible_fields %}
+            <div class="form-field-container">
+                <label
+                    class="mdc-text-field mdc-text-field--outlined {{ field.css_classes }}"
+                >
+                    <span class="mdc-notched-outline">
+                        <span class="mdc-notched-outline__leading"></span>
+                        <span class="mdc-notched-outline__notch">
+                            {# Use field.label, fallback to field.name if no label #}
+                            <span
+                                class="mdc-floating-label"
+                                id="{{ field.id_for_label }}-label"
+                                >{% firstof field.label field.name|capfirst %}</span>
+                        </span>
+                        <span class="mdc-notched-outline__trailing"></span>
+                    </span>
+                    <input
+                        class="mdc-text-field__input"
+                        type="{{ field.field.widget.input_type }}"
+                        name="{{ field.name }}"
+                        id="{{ field.id_for_label }}"
+                        aria-labelledby="{{ field.id_for_label }}-label"
+                        {% if field.field.required %}required{% endif %}
+                        value="{{ field.value|default:'' }}"
+                    />
+                </label>
+                {# Display field errors #} {% if field.errors %}
+                <div class="mdc-text-field-helper-line">
+                    <div
+                        class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg"
+                        aria-hidden="true"
+                    >
+                        {% for error in field.errors %}{{ error }}{% endfor %}
+                    </div>
+                </div>
+                {% elif field.help_text %} {# Display help text if no errors #}
+                <div class="mdc-text-field-helper-line">
+                    <div
+                        class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent"
+                        aria-hidden="true"
+                    >
+                        {{ field.help_text|safe }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            {# --- End of manual field rendering --- #}
+
+            {# Submit Button #}
+            <div class="submit-button-container">
+                <button type="submit" class="mdc-button mdc-button--raised">
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Register</span>
+                </button>
+            </div>
+        </form>
+
+        {# Link to Login Page #}
+        <div class="login-link-container mdc-typography--body2">
+            Already have an account?
+            <a href="{% url 'login' %}" class="mdc-button mdc-button--text">
+                <span class="mdc-button__ripple"></span>
+                <span class="mdc-button__label">Login here</span>
+            </a>
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ensure text fields are initialized
+        document.querySelectorAll('.mdc-text-field').forEach((tf) => {
+            if (tf) mdc.textField.MDCTextField.attachTo(tf);
+        });
+
+        // Check initial state for pre-filled values
+        document.querySelectorAll('.mdc-text-field__input').forEach((input) => {
+            if (input.value) {
+                const label = document.getElementById(input.getAttribute('aria-labelledby'));
+                if (label) {
+                    label.classList.add('mdc-floating-label--float-above');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

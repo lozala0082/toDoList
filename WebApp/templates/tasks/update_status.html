@@ -1,32 +1,161 @@
 {% extends "tasks/base.html" %}
-{% load crispy_forms_tags %}
 
-{% block title %}Update Status - {{ assignment.name }} - Task Manager{% endblock %}
+{% block title %}Update Status - Task Manager{% endblock %}
+
+{% block page_title %}Update Assignment Status{% endblock %}
+
+{% block extra_head %}
+<style>
+    .status-container {
+        display: flex;
+        justify-content: center;
+        padding: 16px;
+    }
+    .status-card {
+        width: 100%;
+        max-width: 500px; /* Adjust as needed */
+        padding: 24px;
+    }
+    .status-card h2 {
+        margin-bottom: 16px;
+        color: var(--mdc-theme-primary, #6200ee);
+    }
+    .assignment-details {
+        margin-top: 16px;
+        margin-bottom: 24px;
+        padding: 16px;
+        background-color: rgba(0, 0, 0, 0.05); /* Subtle background */
+        border-radius: 4px;
+        border-left: 4px solid var(--mdc-theme-primary, #6200ee); /* Primary color accent */
+    }
+    .assignment-details p {
+        margin-bottom: 4px;
+    }
+    .status-options {
+        margin: 24px 0;
+    }
+    .button-container {
+        margin-top: 24px;
+        display: flex;
+        justify-content: flex-end; /* Align buttons right */
+        gap: 8px;
+    }
+    .mdc-button.update-button {
+        /* Custom class for update button styling */
+        --mdc-theme-primary: var(--mdc-theme-primary, #6200ee);
+        --mdc-theme-on-primary: var(--mdc-theme-on-primary, #ffffff);
+    }
+    .mdc-radio {
+        margin-right: 8px;
+    }
+    .mdc-form-field {
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    /* Status colors */
+    .status-not-started {
+        background-color: var(--status-not-started-bg);
+        color: var(--status-not-started-color);
+    }
+    .status-in-progress {
+        background-color: var(--status-in-progress-bg);
+        color: var(--status-in-progress-color);
+    }
+    .status-completed {
+        background-color: var(--status-completed-bg);
+        color: var(--status-completed-color);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="content-section">
-    <h2 class="mb-4">Update Assignment Status</h2>
+<div class="status-container">
+    <div class="mdc-card status-card mdc-card--outlined">
+        <h2 class="mdc-typography--headline6">Update Status</h2>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">{{ assignment.name }}</h5>
-            <p class="card-text">{{ assignment.description }}</p>
-            <p class="card-text">
-                <small class="text-muted">
-                    Due Date: {{ assignment.due_date|date:"M d, Y" }}
-                </small>
+        <p class="mdc-typography--body1">
+            Update the status of this assignment.
+        </p>
+
+        <div class="assignment-details mdc-typography--body2">
+            <p><strong>Assignment:</strong> {{ assignment.name }}</p>
+            <p>
+                <strong>Due Date:</strong> {{ assignment.due_date|date:"M d, Y" }}
             </p>
+            <p><strong>Current Status:</strong> {{ assignment.status }}</p>
         </div>
-    </div>
 
-    <form method="POST">
-        {% csrf_token %}
-        {{ form|crispy }}
-        
-        <div class="mt-4">
-            <button type="submit" class="btn btn-success">Update Status</button>
-            <a href="{% url 'assignment-detail' assignment.pk %}" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="status-options">
+                <h3 class="mdc-typography--subtitle1">Select New Status:</h3>
+
+                {% for status in status_choices %}
+                <div class="mdc-form-field">
+                    <div class="mdc-radio">
+                        <input class="mdc-radio__native-control"
+                               type="radio"
+                               id="status-{{ status.0|slugify }}"
+                               name="status"
+                               value="{{ status.0 }}"
+                               aria-labelledby="status-label-{{ status.0|slugify }}"
+                               {% if status.0 == assignment.status %}checked{% endif %}>
+                        <div class="mdc-radio__background">
+                            <div class="mdc-radio__outer-circle"></div>
+                            <div class="mdc-radio__inner-circle"></div>
+                        </div>
+                        <div class="mdc-radio__ripple"></div>
+                    </div>
+                    <label for="status-{{ status.0|slugify }}" id="status-label-{{ status.0|slugify }}">{{ status.0 }}</label>
+                </div>
+                {% endfor %}
+
+                {% if form.status.errors %}
+                <div class="errorlist">
+                    {% for error in form.status.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="button-container">
+                {# Cancel Button (Outlined or Text) #}
+                <a
+                    href="{% url 'assignment-detail' assignment.pk %}"
+                    class="mdc-button mdc-button--outlined"
+                >
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Cancel</span>
+                </a>
+                {# Update Button (Raised, styled with primary color) #}
+                <button
+                    type="submit"
+                    class="mdc-button mdc-button--raised update-button"
+                >
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Update Status</span>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize radio buttons
+        document.querySelectorAll('.mdc-radio').forEach((radio) => {
+            mdc.radio.MDCRadio.attachTo(radio);
+        });
+
+        // Initialize form fields
+        document.querySelectorAll('.mdc-form-field').forEach((formField) => {
+            mdc.formField.MDCFormField.attachTo(formField);
+        });
+    });
+</script>
+{% endblock %}

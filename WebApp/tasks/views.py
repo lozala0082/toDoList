@@ -43,10 +43,25 @@ class HomeView(LoginRequiredMixin, ListView):
             due_date__lt=week_start + timedelta(days=7)
         ).order_by('due_date')
 
+        # Get the monthly assignments, excluding those already in today or weekly lists
+        today_and_weekly_ids = list(context['today_assignments'].values_list('id', flat=True)) + \
+                              list(context['weekly_assignments'].values_list('id', flat=True))
+
+        # Get all assignments for this month
+        month_end = (month_start.replace(month=month_start.month % 12 + 1, day=1) if month_start.month < 12
+                    else month_start.replace(year=month_start.year + 1, month=1, day=1)) - timedelta(days=1)
+
         context['monthly_assignments'] = base_queryset.filter(
             due_date__gte=month_start,
-            due_date__lt=month_start + timedelta(days=32)
-        ).order_by('due_date')
+            due_date__lte=month_end
+        ).exclude(id__in=today_and_weekly_ids).order_by('due_date')
+
+        # Get assignments due beyond this month
+        all_current_ids = today_and_weekly_ids + list(context['monthly_assignments'].values_list('id', flat=True))
+
+        context['future_assignments'] = base_queryset.filter(
+            due_date__gt=month_end
+        ).exclude(id__in=all_current_ids).order_by('due_date')
 
         return context
 
@@ -93,6 +108,12 @@ class AssignmentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 @login_required
 def update_status(request, pk):
     assignment = get_object_or_404(Assignment, pk=pk)
+
+    # Check if user is authorized (either staff or assignee)
+    if not (request.user.is_staff or assignment.assignees.filter(id=request.user.id).exists()):
+        messages.error(request, 'You are not authorized to update this assignment.')
+        return redirect('assignment-detail', pk=pk)
+
     if request.method == 'POST':
         form = AssignmentStatusForm(request.POST, instance=assignment)
         if form.is_valid():
@@ -101,7 +122,13 @@ def update_status(request, pk):
             return redirect('assignment-detail', pk=pk)
     else:
         form = AssignmentStatusForm(instance=assignment)
-    return render(request, 'tasks/update_status.html', {'form': form, 'assignment': assignment})
+
+    # Add status choices to context
+    return render(request, 'tasks/update_status.html', {
+        'form': form,
+        'assignment': assignment,
+        'status_choices': Assignment.STATUS_CHOICES
+    })
 
 def register(request):
     if request.method == 'POST':
@@ -112,4 +139,4 @@ def register(request):
             return redirect('login')
     else:
         form = UserRegistrationForm()
-    return render(request, 'tasks/register.html', {'form': form}) 
+    return render(request, 'tasks/register.html', {'form': form})

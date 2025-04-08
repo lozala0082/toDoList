@@ -1,38 +1,300 @@
 {% extends "tasks/base.html" %}
-{% load crispy_forms_tags %}
 
 {% block title %}
-    {% if form.instance.pk %}
-        Edit Assignment - Task Manager
-    {% else %}
-        New Assignment - Task Manager
-    {% endif %}
+    {% if form.instance.pk %}Edit{% else %}New{% endif %} Assignment - Task Manager
+{% endblock %}
+
+{% block page_title %}
+    {% if form.instance.pk %}Edit{% else %}Create{% endif %} Assignment
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .form-container {
+        display: flex;
+        justify-content: center;
+        padding: 16px;
+    }
+    .form-card {
+        width: 100%;
+        max-width: 600px; /* Adjust as needed */
+        padding: 24px;
+    }
+    .form-card h2 {
+        margin-bottom: 24px;
+        text-align: center; /* Center title within card */
+    }
+    .form-field-container {
+        margin-bottom: var(--form-field-margin-bottom);
+    }
+    /* M3 Text Fields & Textarea require width */
+    .mdc-text-field {
+        width: 100%;
+    }
+    .mdc-text-field--textarea {
+        /* Allow textarea to resize vertically */
+        height: auto;
+        min-height: 100px; /* Example min height */
+    }
+    .checkbox-list-label {
+        margin-bottom: 8px;
+        display: block; /* Make it block for margin */
+        color: rgba(0, 0, 0, 0.6); /* Standard M3 label color */
+        font-size: 0.9rem;
+    }
+    .mdc-form-field {
+        /* Container for checkbox + label */
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    /* Custom checkbox styling */
+    .custom-checkbox-container {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .custom-checkbox-container:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    /* Hide the default checkbox but keep it accessible */
+    .custom-checkbox-container input[type="checkbox"] {
+        opacity: 0;
+        position: absolute;
+        pointer-events: none;
+    }
+
+    /* Custom checkbox appearance */
+    .custom-checkbox {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        border-radius: 2px;
+        background-color: white;
+        border: 2px solid rgba(0, 0, 0, 0.54);
+        transition: all 0.2s;
+    }
+
+    /* Checked state */
+    .custom-checkbox-container input[type="checkbox"]:checked + .custom-checkbox {
+        background-color: var(--mdc-theme-primary);
+        border-color: var(--mdc-theme-primary);
+    }
+
+    /* Checkmark */
+    .custom-checkbox-checkmark {
+        display: none;
+        color: white;
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    .custom-checkbox-container input[type="checkbox"]:checked + .custom-checkbox .custom-checkbox-checkmark {
+        display: block;
+    }
+
+    /* Label styling */
+    .custom-checkbox-label {
+        font-size: 1rem;
+        line-height: 1.5;
+        flex: 1;
+    }
+    .button-container {
+        margin-top: 24px;
+        display: flex;
+        justify-content: flex-end; /* Align buttons to the right */
+        gap: 8px;
+    }
+    .errorlist {
+        color: var(--mdc-theme-error, #b00020);
+        font-size: 0.8em;
+        list-style: none;
+        padding: 0;
+        margin-top: 4px;
+    }
+    /* Ensure helper text wraps */
+    .mdc-text-field-helper-text {
+        white-space: normal;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="content-section">
-    <h2 class="mb-4">
-        {% if form.instance.pk %}
-            Edit Assignment
-        {% else %}
-            New Assignment
-        {% endif %}
-    </h2>
+<div class="form-container">
+    <div class="mdc-card form-card mdc-card--outlined">
+        <form method="POST" novalidate>
+            {% csrf_token %}
 
-    <form method="POST">
-        {% csrf_token %}
-        {{ form|crispy }}
-        
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">
-                {% if form.instance.pk %}
-                    Update Assignment
-                {% else %}
-                    Create Assignment
+            {# Display non-field errors #}
+            {% if form.non_field_errors %}
+            <div class="errorlist form-field-container">
+                {% for error in form.non_field_errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {# --- Render each field manually --- #}
+            {# Name Field (CharField -> mdc-text-field) #}
+            <div class="form-field-container">
+                {% with field=form.name %}
+                <label
+                    class="mdc-text-field mdc-text-field--outlined {{ field.css_classes }}"
+                >
+                    <span class="mdc-notched-outline">
+                        <span class="mdc-notched-outline__leading"></span>
+                        <span class="mdc-notched-outline__notch">
+                            <span
+                                class="mdc-floating-label"
+                                id="{{ field.id_for_label }}-label"
+                                >{% firstof field.label field.name|capfirst %}</span>
+                        </span>
+                        <span class="mdc-notched-outline__trailing"></span>
+                    </span>
+                    <input
+                        class="mdc-text-field__input"
+                        type="text"
+                        name="{{ field.name }}"
+                        id="{{ field.id_for_label }}"
+                        aria-labelledby="{{ field.id_for_label }}-label"
+                        {% if field.field.required %}required{% endif %}
+                        value="{{ field.value|default:'' }}"
+                    />
+                </label>
+                {% include "tasks/partials/form_field_errors.html" with field=field %}
+                {% endwith %}
+            </div>
+
+            {# Due Date Field (DateField -> mdc-text-field with type="date") #}
+            <div class="form-field-container">
+                {% with field=form.due_date %}
+                {# Note: M3 doesn't have a native date picker. This uses the browser's. #}
+                <label
+                    class="mdc-text-field mdc-text-field--outlined mdc-text-field--label-floating {{ field.css_classes }}"
+                >
+                    <span class="mdc-notched-outline">
+                        <span class="mdc-notched-outline__leading"></span>
+                        <span class="mdc-notched-outline__notch">
+                            <span
+                                class="mdc-floating-label mdc-floating-label--float-above"
+                                id="{{ field.id_for_label }}-label"
+                                >{% firstof field.label field.name|capfirst %}</span>
+                        </span>
+                        <span class="mdc-notched-outline__trailing"></span>
+                    </span>
+                    {# Format value correctly for date input: YYYY-MM-DD #}
+                    <input
+                        class="mdc-text-field__input"
+                        type="date"
+                        name="{{ field.name }}"
+                        id="{{ field.id_for_label }}"
+                        aria-labelledby="{{ field.id_for_label }}-label"
+                        {% if field.field.required %}required{% endif %}
+                        value="{% if field.value %}{{ field.value|date:'Y-m-d' }}{% endif %}"
+                    />
+                </label>
+                {% include "tasks/partials/form_field_errors.html" with field=field %}
+                {% endwith %}
+            </div>
+
+            {# Description Field (TextField -> mdc-text-field--textarea) #}
+            <div class="form-field-container">
+                {% with field=form.description %}
+                <label
+                    class="mdc-text-field mdc-text-field--outlined mdc-text-field--textarea {{ field.css_classes }}"
+                >
+                    <span class="mdc-notched-outline">
+                        <span class="mdc-notched-outline__leading"></span>
+                        <span class="mdc-notched-outline__notch">
+                            <span
+                                class="mdc-floating-label"
+                                id="{{ field.id_for_label }}-label"
+                                >{% firstof field.label field.name|capfirst %}</span>
+                        </span>
+                        <span class="mdc-notched-outline__trailing"></span>
+                    </span>
+                    {# Use textarea element #}
+                    <span class="mdc-text-field__resizer">
+                        <textarea
+                            class="mdc-text-field__input"
+                            name="{{ field.name }}"
+                            id="{{ field.id_for_label }}"
+                            aria-labelledby="{{ field.id_for_label }}-label"
+                            rows="4"
+                            {% if field.field.required %}required{% endif %}
+                        >{{ field.value|default:'' }}</textarea>
+                    </span>
+                </label>
+                {% include "tasks/partials/form_field_errors.html" with field=field %}
+                {% endwith %}
+            </div>
+
+            {# Assignees Field (ManyToManyField -> mdc-checkbox) #}
+            <div class="form-field-container">
+                {% with field=form.assignees %}
+                <span class="checkbox-list-label mdc-typography--body2"
+                    >{% firstof field.label field.name|capfirst %}</span>
+
+                {% if field.errors %}
+                <div class="errorlist">
+                    {% for error in field.errors %}{{ error }}{% endfor %}
+                </div>
                 {% endif %}
-            </button>
-            <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
+
+                {# Iterate through choices provided by CheckboxSelectMultiple #}
+                {% for choice in field %}
+                <label class="custom-checkbox-container" for="{{ choice.id_for_label }}">
+                    {{ choice.tag }}
+                    <div class="custom-checkbox">
+                        <span class="custom-checkbox-checkmark">✓</span>
+                    </div>
+                    <span class="custom-checkbox-label">{{ choice.choice_label }}</span>
+                </label>
+                {% endfor %}
+                {% endwith %}
+            </div>
+
+            {# Action Buttons #}
+            <div class="button-container">
+                <a
+                    href="{% if form.instance.pk %}{% url 'assignment-detail' form.instance.pk %}{% else %}{% url 'home' %}{% endif %}"
+                    class="mdc-button mdc-button--outlined"
+                >
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Cancel</span>
+                </a>
+                <button type="submit" class="mdc-button mdc-button--raised">
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">
+                        {% if form.instance.pk %}Update{% else %}Create{% endif %} Assignment
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ensure Text Fields are initialized
+        document.querySelectorAll(".mdc-text-field").forEach((tf) => {
+            mdc.textField.MDCTextField.attachTo(tf);
+        });
+
+        // Our custom checkboxes work with native HTML functionality
+        // The label's 'for' attribute handles the toggling automatically
+    });
+</script>
+{% endblock %}

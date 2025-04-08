@@ -1,67 +1,300 @@
 {% extends "tasks/base.html" %}
-{% load crispy_forms_tags %}
 
 {% block title %}{{ assignment.name }} - Task Manager{% endblock %}
 
+{% block page_title %}{{ assignment.name }}{% endblock %} {# Sets the title in the Top App Bar #}
+
+{% block extra_head %}
+<style>
+    .detail-container {
+        padding: 16px;
+        max-width: 900px; /* Optional max width */
+        margin: 16px auto;
+    }
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    .status-chip {
+        /* Using a simple div, M3 Chips are more complex */
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 0.9em;
+        font-weight: 500;
+        /* Use status colors defined in home.html or base.html */
+    }
+    .status-not-started {
+        background-color: var(--status-not-started-bg);
+        color: var(--status-not-started-color);
+    }
+    .status-in-progress {
+        background-color: var(--status-in-progress-bg);
+        color: var(--status-in-progress-color);
+    }
+    .status-completed {
+        background-color: var(--status-completed-bg);
+        color: var(--status-completed-color);
+    }
+
+    .detail-card {
+        margin-bottom: 16px;
+    }
+    .detail-card .mdc-card__content {
+        /* Add padding inside card */
+        padding: 16px;
+    }
+    .detail-card .mdc-list-item {
+        height: auto; /* Allow list items to grow */
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+    .detail-card .mdc-list-item__meta {
+        /* Style for icons */
+        color: rgba(0, 0, 0, 0.6);
+    }
+
+    .action-buttons {
+        margin-top: 24px;
+        display: flex;
+        gap: 8px; /* Space between buttons */
+        flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+    }
+    /* Optional: Specific button styling */
+    .mdc-button--raised {
+        /* e.g., Edit button */
+        --mdc-theme-primary: var(
+            --mdc-theme-secondary,
+            #03dac6
+        ); /* Use secondary color? */
+        --mdc-theme-on-primary: var(--mdc-theme-on-secondary, #000000);
+    }
+    /* Button styling is handled by MDC and custom attributes */
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="content-section">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>{{ assignment.name }}</h2>
-        <span class="assignment-status status-{{ assignment.status|lower|cut:" " }}">
+<div class="detail-container">
+    {# Header with Title and Status #}
+    <div class="detail-header">
+        <h1 class="mdc-typography--headline4">{{ assignment.name }}</h1>
+        <span class="status-chip status-{{ assignment.status|lower|slugify }}">
             {{ assignment.status }}
         </span>
     </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Description</h5>
-                    <p class="card-text">{{ assignment.description }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Details</h5>
-                    <ul class="list-unstyled">
-                        <li><strong>Due Date:</strong> {{ assignment.due_date|date:"M d, Y" }}</li>
-                        <li><strong>Created by:</strong> {{ assignment.creator.username }}</li>
-                        <li><strong>Created on:</strong> {{ assignment.created_at|date:"M d, Y H:i" }}</li>
-                        <li><strong>Last updated:</strong> {{ assignment.updated_at|date:"M d, Y H:i" }}</li>
-                    </ul>
+    {# Main Content Area - Using M3 Cards #}
+    <div class="mdc-layout-grid">
+        {# Optional: Use grid for layout #}
+        <div class="mdc-layout-grid__inner">
+            {# Description Card #}
+            <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+                <div class="mdc-card mdc-card--outlined detail-card">
+                    <div class="mdc-card__content">
+                        <h2
+                            class="mdc-typography--headline6"
+                            style="margin-bottom: 16px"
+                        >
+                            Description
+                        </h2>
+                        <p class="mdc-typography--body1">
+                            {{ assignment.description|linebreaksbr|default:"No description provided." }}
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Assignees</h5>
-                    {% if assignment.assignees.all %}
-                        <ul class="list-unstyled">
+            {# Details Card #}
+            <div
+                class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6-desktop mdc-layout-grid__cell--span-12-tablet"
+            >
+                <div class="mdc-card mdc-card--outlined detail-card">
+                    <div class="mdc-card__content">
+                        <h2
+                            class="mdc-typography--headline6"
+                            style="margin-bottom: 8px"
+                        >
+                            Details
+                        </h2>
+                        <ul class="mdc-list" aria-orientation="vertical">
+                            <li class="mdc-list-item" tabindex="-1">
+                                {# tabindex -1 for non-interactive items #}
+                                <span
+                                    class="mdc-list-item__graphic material-symbols-outlined"
+                                    aria-hidden="true"
+                                    >calendar_month</span
+                                >
+                                <span class="mdc-list-item__text">
+                                    <span class="mdc-list-item__primary-text"
+                                        >Due Date</span
+                                    >
+                                    <span class="mdc-list-item__secondary-text">
+                                        {{ assignment.due_date|date:"M d, Y" }}
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdc-list-item" tabindex="-1">
+                                <span
+                                    class="mdc-list-item__graphic material-symbols-outlined"
+                                    aria-hidden="true"
+                                    >person</span
+                                >
+                                <span class="mdc-list-item__text">
+                                    <span class="mdc-list-item__primary-text"
+                                        >Created by</span
+                                    >
+                                    <span class="mdc-list-item__secondary-text">
+                                        {{ assignment.creator.username|default:"N/A" }}
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdc-list-item" tabindex="-1">
+                                <span
+                                    class="mdc-list-item__graphic material-symbols-outlined"
+                                    aria-hidden="true"
+                                    >schedule</span
+                                >
+                                <span class="mdc-list-item__text">
+                                    <span class="mdc-list-item__primary-text"
+                                        >Created on</span
+                                    >
+                                    <span class="mdc-list-item__secondary-text">
+                                        {{ assignment.created_at|date:"M d, Y H:i" }}
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdc-list-item" tabindex="-1">
+                                <span
+                                    class="mdc-list-item__graphic material-symbols-outlined"
+                                    aria-hidden="true"
+                                    >update</span
+                                >
+                                <span class="mdc-list-item__text">
+                                    <span class="mdc-list-item__primary-text"
+                                        >Last updated</span
+                                    >
+                                    <span class="mdc-list-item__secondary-text">
+                                        {{ assignment.updated_at|date:"M d, Y H:i" }}
+                                    </span>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            {# Assignees Card #}
+            <div
+                class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6-desktop mdc-layout-grid__cell--span-12-tablet"
+            >
+                <div class="mdc-card mdc-card--outlined detail-card">
+                    <div class="mdc-card__content">
+                        <h2
+                            class="mdc-typography--headline6"
+                            style="margin-bottom: 8px"
+                        >
+                            Assignees
+                        </h2>
+                        {% if assignment.assignees.all %}
+                        <ul class="mdc-list" aria-orientation="vertical">
                             {% for assignee in assignment.assignees.all %}
-                                <li>{{ assignee.username }}</li>
+                            <li class="mdc-list-item" tabindex="-1">
+                                <span
+                                    class="mdc-list-item__graphic material-symbols-outlined"
+                                    aria-hidden="true"
+                                    >person</span
+                                >
+                                <span class="mdc-list-item__text"
+                                    >{{ assignee.username }}</span
+                                >
+                            </li>
                             {% endfor %}
                         </ul>
-                    {% else %}
-                        <p class="text-muted">No assignees</p>
-                    {% endif %}
+                        {% else %}
+                        <p class="mdc-typography--body2">No assignees</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
+        {# End Grid Inner #}
     </div>
+    {# End Grid #}
 
-    <div class="mt-4">
-        <div class="btn-group" role="group">
-            {% if user.is_staff %}
-                <a href="{% url 'assignment-update' assignment.pk %}" class="btn btn-warning">Edit Assignment</a>
-                <a href="{% url 'assignment-delete' assignment.pk %}" class="btn btn-danger">Delete Assignment</a>
-            {% endif %}
-            {% if user in assignment.assignees.all %}
-                <a href="{% url 'update-status' assignment.pk %}" class="btn btn-success">Update Status</a>
-            {% endif %}
-            <a href="{% url 'home' %}" class="btn btn-secondary">Back to List</a>
-        </div>
+    {# Action Buttons #}
+    <div class="action-buttons">
+        {# Conditional Buttons based on user permissions/role #}
+        {% if user.is_staff %}
+        <a
+            href="{% url 'assignment-update' assignment.pk %}"
+            class="mdc-button mdc-button--raised"
+        >
+            <span class="mdc-button__ripple"></span>
+            <span
+                class="material-symbols-outlined mdc-button__icon"
+                aria-hidden="true"
+                >edit</span
+            >
+            <span class="mdc-button__label">Edit</span>
+        </a>
+        <a
+            href="{% url 'assignment-delete' assignment.pk %}"
+            class="mdc-button mdc-button--raised"
+            style="--mdc-theme-primary: var(--mdc-theme-error, #b00020)"
+        >
+            {# Style delete button #}
+            <span class="mdc-button__ripple"></span>
+            <span
+                class="material-symbols-outlined mdc-button__icon"
+                aria-hidden="true"
+                >delete</span
+            >
+            <span class="mdc-button__label">Delete</span>
+        </a>
+        {% endif %}
+
+        {# Check if current logged-in user is among the assignees #}
+        {% if user in assignment.assignees.all or user.is_staff %}
+        {# Allow staff to update status too? Adjust logic as needed #}
+        <a
+            href="{% url 'update-status' assignment.pk %}"
+            class="mdc-button mdc-button--raised"
+            style="--mdc-theme-primary: var(--mdc-theme-primary)"
+        >
+            {# Use primary color #}
+            <span class="mdc-button__ripple"></span>
+            <span
+                class="material-symbols-outlined mdc-button__icon"
+                aria-hidden="true"
+                >task_alt</span
+            >
+            <span class="mdc-button__label">Update Status</span>
+        </a>
+        {% endif %}
+
+        {# Back Button #}
+        <a href="{% url 'home' %}" class="mdc-button mdc-button--outlined">
+            <span class="mdc-button__ripple"></span>
+            <span
+                class="material-symbols-outlined mdc-button__icon"
+                aria-hidden="true"
+                >arrow_back</span
+            >
+            <span class="mdc-button__label">Back to List</span>
+        </a>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize any interactive list items if needed
+        document.querySelectorAll(".mdc-list-item[tabindex='0']").forEach((listItem) => {
+            mdc.ripple.MDCRipple.attachTo(listItem);
+        });
+    });
+</script>
+{% endblock %}

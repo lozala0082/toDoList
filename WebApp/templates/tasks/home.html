@@ -1,220 +1,276 @@
 {% extends "tasks/base.html" %}
-{% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}Home - Task Manager{% endblock %}
 
-{% block extra_head %}
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% block page_title %}Dashboard{% endblock %} {# Sets the title in the Top App Bar #}
+
+{% block extra_head %} {# Add any page-specific CSS overrides here if needed #}
 <style>
-    :root {
-        --spotify-black: #121212;
-        --spotify-dark-gray: #282828;
-        --spotify-light-gray: #b3b3b3;
-        --spotify-green: #1db954;
-        --spotify-white: #ffffff;
+    .assignment-list-container {
+        max-width: 800px; /* Constrain width */
+        margin: 0 auto; /* Center the list container */
+        padding: 0 16px; /* Add some padding on small screens */
     }
 
-    body {
-        background-color: var(--spotify-black);
-        color: var(--spotify-white);
-        font-family: 'Montserrat', sans-serif;
+    /* Add extra space for the welcome message */
+    .welcome-message {
+        margin-top: 24px;
+        margin-bottom: 32px;
+        padding-top: 8px;
     }
 
-    .main-container {
-        display: grid;
-        grid-template-columns: 240px 1fr;
-        min-height: 100vh;
-    }
-
-    .sidebar {
-        background-color: var(--spotify-black);
-        padding: 24px 12px;
-        border-right: 1px solid #282828;
-    }
-
-    .sidebar-logo {
-        color: var(--spotify-white);
-        font-size: 24px;
-        font-weight: 700;
-        margin-bottom: 24px;
-        padding: 0 12px;
-    }
-
-    .nav-item {
-        color: var(--spotify-light-gray);
-        padding: 8px 12px;
-        margin: 4px 0;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: color 0.2s;
-    }
-
-    .nav-item:hover {
-        color: var(--spotify-white);
-    }
-
-    .nav-item.active {
-        color: var(--spotify-white);
-        background-color: var(--spotify-dark-gray);
-    }
-
-    .content-area {
-        background: linear-gradient(to bottom, #404040, var(--spotify-black));
-        padding: 24px 32px;
-        overflow-y: auto;
+    /* Cat image styling */
+    .lockedin-cat {
+        max-width: 150px;
+        margin: 16px auto;
+        display: block;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .welcome-section {
-        margin-bottom: 40px;
-    }
-
-    .welcome-text {
-        font-size: 32px;
-        font-weight: 700;
-        margin-bottom: 16px;
-    }
-
-    .section-title {
-        font-size: 24px;
-        font-weight: 700;
-        margin: 24px 0 16px;
-        color: var(--spotify-white);
-    }
-
-    .task-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 16px;
-        margin-bottom: 32px;
-    }
-
-    .task-card {
-        background-color: var(--spotify-dark-gray);
-        padding: 16px;
-        border-radius: 8px;
-        transition: background-color 0.2s;
-        cursor: pointer;
-    }
-
-    .task-card:hover {
-        background-color: #383838;
-    }
-
-    .task-header {
         display: flex;
         align-items: center;
-        margin-bottom: 12px;
+        justify-content: space-between;
+        margin-bottom: 24px;
     }
 
-    .task-checkbox {
-        width: 24px;
-        height: 24px;
-        border: 2px solid var(--spotify-light-gray);
-        border-radius: 4px;
-        margin-right: 12px;
+    @media (max-width: 600px) {
+        .welcome-section {
+            flex-direction: column;
+        }
     }
 
-    .task-text {
-        color: var(--spotify-white);
-        font-size: 16px;
-        font-weight: 500;
+    /* Assignment sections layout */
+    .assignment-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 32px; /* Space between sections */
     }
 
-    .task-due-date {
-        color: var(--spotify-light-gray);
-        font-size: 14px;
-        margin-top: 8px;
+    /* Individual section styling */
+    .assignment-section {
+        background-color: var(--mdc-theme-surface);
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     }
 
+    /* Empty section message */
+    .empty-section-message {
+        color: rgba(0, 0, 0, 0.6);
+        padding: 8px 16px;
+        font-style: italic;
+    }
+
+    /* List item styling */
+    .mdc-list-item__secondary-text {
+        display: flex; /* Align status and due date */
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    /* Status badge styling */
     .status-badge {
-        display: inline-block;
-        padding: 4px 8px;
+        font-size: 0.8em;
+        padding: 2px 8px;
         border-radius: 12px;
-        font-size: 12px;
         font-weight: 500;
-        margin-top: 8px;
+        margin-left: 8px; /* Spacing from due date */
     }
 
-    .status-pending {
-        background-color: #ffd700;
-        color: var(--spotify-black);
+    /* Status colors */
+    .status-not-started {
+        background-color: var(--status-not-started-bg);
+        color: var(--status-not-started-color);
     }
-
     .status-in-progress {
-        background-color: var(--spotify-green);
-        color: var(--spotify-black);
+        background-color: var(--status-in-progress-bg);
+        color: var(--status-in-progress-color);
+    }
+    .status-completed {
+        background-color: var(--status-completed-bg);
+        color: var(--status-completed-color);
     }
 
-    .status-completed {
-        background-color: #1db954;
-        color: var(--spotify-white);
+    /* Link styling for list items */
+    .mdc-list-item a.mdc-list-item__primary-text,
+    .mdc-list-item a.mdc-list-item__secondary-text {
+        text-decoration: none;
+        color: inherit; /* Inherit color from list item */
+    }
+    .mdc-list-item a:hover {
+        text-decoration: underline;
+    }
+
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
+        .assignment-sections {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .assignment-section {
+            flex: 1;
+            min-width: 250px;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="main-container">
-    <div class="sidebar">
-        <div class="sidebar-logo">Task Manager</div>
-        <div class="nav-item active">Home</div>
-        <div class="nav-item">Today's Tasks</div>
-        <div class="nav-item">Weekly View</div>
-        <div class="nav-item">Monthly View</div>
-        <div class="nav-item">Completed</div>
+<div class="assignment-list-container">
+    <div class="welcome-section">
+        <h2 class="mdc-typography--headline5 welcome-message">
+            Welcome back, {{ user.username }}!
+        </h2>
+        <img src="{% static 'images/lockedincat.png' %}" alt="Locked In Cat" class="lockedin-cat">
     </div>
 
-    <div class="content-area">
-        <div class="welcome-section">
-            <div class="welcome-text">Welcome back, {{ user.username }}!</div>
+    {# Assignment Sections Container #}
+    <div class="assignment-sections">
+        {# Display Today's Assignments #}
+        <div class="assignment-section">
+            <h3 class="mdc-typography--headline6" style="margin-bottom: 16px">
+                Today
+            </h3>
+            {% if today_assignments %}
+            <ul class="mdc-list mdc-list--two-line" aria-orientation="vertical">
+                {% for assignment in today_assignments %}
+                <li class="mdc-list-item" tabindex="0">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">
+                        <a href="{% url 'assignment-detail' assignment.pk %}" class="mdc-list-item__primary-text">
+                            {{ assignment.name }}
+                        </a>
+                        <span class="mdc-list-item__secondary-text">
+                            <span>Due: {{ assignment.due_date|date:"M d, Y" }}</span>
+                            <span class="status-badge status-{{ assignment.status|lower|slugify }}">
+                                {{ assignment.status }}
+                            </span>
+                        </span>
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="mdc-typography--body2 empty-section-message">No assignments due today.</p>
+            {% endif %}
         </div>
 
-        <div class="section-title">Today's To Do's</div>
-        <div class="task-grid">
-            {% for assignment in today_assignments %}
-            <div class="task-card">
-                <div class="task-header">
-                    <div class="task-checkbox"></div>
-                    <div class="task-text">{{ assignment.name }}</div>
-                </div>
-                <div class="task-due-date">Due: {{ assignment.due_date|date:"M d, Y" }}</div>
-                <div class="status-badge status-{{ assignment.status|lower|cut:" " }}">
-                    {{ assignment.status }}
-                </div>
-            </div>
-            {% endfor %}
+        {# Display Weekly Assignments #}
+        <div class="assignment-section">
+            <h3 class="mdc-typography--headline6" style="margin-bottom: 16px">
+                This Week
+            </h3>
+            {% if weekly_assignments %}
+            <ul class="mdc-list mdc-list--two-line" aria-orientation="vertical">
+                {% for assignment in weekly_assignments %}
+                <li class="mdc-list-item" tabindex="0">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">
+                        <a href="{% url 'assignment-detail' assignment.pk %}" class="mdc-list-item__primary-text">
+                            {{ assignment.name }}
+                        </a>
+                        <span class="mdc-list-item__secondary-text">
+                            <span>Due: {{ assignment.due_date|date:"M d, Y" }}</span>
+                            <span class="status-badge status-{{ assignment.status|lower|slugify }}">
+                                {{ assignment.status }}
+                            </span>
+                        </span>
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="mdc-typography--body2 empty-section-message">No assignments due this week.</p>
+            {% endif %}
         </div>
 
-        <div class="section-title">Weekly Works</div>
-        <div class="task-grid">
-            {% for assignment in weekly_assignments %}
-            <div class="task-card">
-                <div class="task-header">
-                    <div class="task-checkbox"></div>
-                    <div class="task-text">{{ assignment.name }}</div>
-                </div>
-                <div class="task-due-date">Due: {{ assignment.due_date|date:"M d, Y" }}</div>
-                <div class="status-badge status-{{ assignment.status|lower|cut:" " }}">
-                    {{ assignment.status }}
-                </div>
-            </div>
-            {% endfor %}
+        {# Display Monthly Assignments #}
+        <div class="assignment-section">
+            <h3 class="mdc-typography--headline6" style="margin-bottom: 16px">
+                This Month
+            </h3>
+            {% if monthly_assignments %}
+            <ul class="mdc-list mdc-list--two-line" aria-orientation="vertical">
+                {% for assignment in monthly_assignments %}
+                <li class="mdc-list-item" tabindex="0">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">
+                        <a href="{% url 'assignment-detail' assignment.pk %}" class="mdc-list-item__primary-text">
+                            {{ assignment.name }}
+                        </a>
+                        <span class="mdc-list-item__secondary-text">
+                            <span>Due: {{ assignment.due_date|date:"M d, Y" }}</span>
+                            <span class="status-badge status-{{ assignment.status|lower|slugify }}">
+                                {{ assignment.status }}
+                            </span>
+                        </span>
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="mdc-typography--body2 empty-section-message">No assignments due this month.</p>
+            {% endif %}
         </div>
 
-        <div class="section-title">Monthly Madness</div>
-        <div class="task-grid">
-            {% for assignment in monthly_assignments %}
-            <div class="task-card">
-                <div class="task-header">
-                    <div class="task-checkbox"></div>
-                    <div class="task-text">{{ assignment.name }}</div>
-                </div>
-                <div class="task-due-date">Due: {{ assignment.due_date|date:"M d, Y" }}</div>
-                <div class="status-badge status-{{ assignment.status|lower|cut:" " }}">
-                    {{ assignment.status }}
-                </div>
-            </div>
-            {% endfor %}
+        {# Display Future Assignments #}
+        <div class="assignment-section">
+            <h3 class="mdc-typography--headline6" style="margin-bottom: 16px">
+                Future
+            </h3>
+            {% if future_assignments %}
+            <ul class="mdc-list mdc-list--two-line" aria-orientation="vertical">
+                {% for assignment in future_assignments %}
+                <li class="mdc-list-item" tabindex="0">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">
+                        <a href="{% url 'assignment-detail' assignment.pk %}" class="mdc-list-item__primary-text">
+                            {{ assignment.name }}
+                        </a>
+                        <span class="mdc-list-item__secondary-text">
+                            <span>Due: {{ assignment.due_date|date:"M d, Y" }}</span>
+                            <span class="status-badge status-{{ assignment.status|lower|slugify }}">
+                                {{ assignment.status }}
+                            </span>
+                        </span>
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="mdc-typography--body2 empty-section-message">No future assignments scheduled.</p>
+            {% endif %}
         </div>
     </div>
+
+    {# Message if no assignments are visible #}
+    {% if not today_assignments and not weekly_assignments and not monthly_assignments and not future_assignments %}
+    <div class="assignment-section" style="text-align: center;">
+        <p class="mdc-typography--body1" style="margin: 24px 0;">
+            No assignments found.
+            {% if user.is_staff %}
+            <a href="{% url 'assignment-create' %}" class="mdc-button mdc-button--unelevated">
+                <span class="mdc-button__ripple"></span>
+                <span class="mdc-button__label">Create New Assignment</span>
+            </a>
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
 </div>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ensure ripples are attached to list items
+        document.querySelectorAll(".mdc-list-item").forEach((listItem) => {
+            if (listItem) mdc.ripple.MDCRipple.attachTo(listItem);
+        });
+    });
+</script>
+{% endblock %}

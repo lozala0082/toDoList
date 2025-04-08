@@ -1,29 +1,196 @@
 {% extends "tasks/base.html" %}
-{% load crispy_forms_tags %}
-
+{% load static %}
 {% block title %}Login - Task Manager{% endblock %}
+{% block page_title %}Login{% endblock %} {# Sets the title in the Top App Bar #}
+
+{% block extra_head %}
+<style>
+    .login-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 120px); /* Adjust based on top-app-bar height and desired padding */
+        padding: 16px;
+    }
+    .login-card {
+        width: 100%;
+        max-width: 400px; /* Or your preferred max width */
+        padding: 24px;
+    }
+
+    /* Cat image styling */
+    .bosscat-image {
+        max-width: 200px;
+        margin-bottom: 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .login-card h2 {
+        margin-bottom: 24px;
+        text-align: center;
+    }
+    .form-field-container {
+        margin-bottom: var(--form-field-margin-bottom);
+    }
+    /* M3 Text Fields require width */
+    .mdc-text-field {
+        width: 100%;
+    }
+    .submit-button-container {
+        margin-top: 24px;
+        display: flex;
+        justify-content: center; /* Center login button */
+    }
+    .register-link-container {
+        margin-top: 16px;
+        text-align: center;
+    }
+    .errorlist {
+        /* Basic styling for Django form errors */
+        color: var(--mdc-theme-error, #b00020);
+        font-size: 0.8em;
+        list-style: none;
+        padding: 0;
+        margin-top: 4px;
+    }
+    /* Style for validation messages below fields */
+    .mdc-text-field-helper-text--validation-msg {
+        color: var(--mdc-theme-error, #b00020);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="content-section">
-            <h2 class="mb-4">Login</h2>
+<div class="login-container">
+    <img src="{% static 'images/bosscat.png' %}" alt="Boss Cat" class="bosscat-image">
+    <div class="mdc-card login-card mdc-card--outlined">
+        <h2 class="mdc-typography--headline5">Login</h2>
 
-            <form method="POST">
-                {% csrf_token %}
-                {{ form|crispy }}
-                
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </div>
-            </form>
+        <form method="POST" novalidate>
+            {% csrf_token %}
 
-            <div class="mt-3">
-                <p class="text-muted">
-                    Don't have an account? <a href="{% url 'register' %}" class="text-decoration-none">Register here</a>
-                </p>
+            {# Display non-field errors (e.g., invalid login) #}
+            {% if form.non_field_errors %}
+            <div class="errorlist form-field-container">
+                {% for error in form.non_field_errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
             </div>
+            {% endif %}
+
+            {# Manually render username field with M3 Text Field #}
+            <div class="form-field-container">
+                <label
+                    class="mdc-text-field mdc-text-field--outlined {% if form.username.errors %}mdc-text-field--invalid{% endif %}"
+                    id="username-field"
+                >
+                    <span class="mdc-notched-outline">
+                        <span class="mdc-notched-outline__leading"></span>
+                        <span class="mdc-notched-outline__notch">
+                            <span class="mdc-floating-label{% if form.username.value %} mdc-floating-label--float-above{% endif %}" id="username-label">{{ form.username.label }}</span>
+                        </span>
+                        <span class="mdc-notched-outline__trailing"></span>
+                    </span>
+                    <input
+                        class="mdc-text-field__input"
+                        type="text"
+                        name="{{ form.username.html_name }}"
+                        id="{{ form.username.auto_id }}"
+                        aria-labelledby="username-label"
+                        value="{{ form.username.value|default:'' }}"
+                        required
+                    />
+                </label>
+                {# Display field errors for username #}
+                {% if form.username.errors %}
+                <div class="mdc-text-field-helper-line">
+                    <div
+                        class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg"
+                        aria-hidden="true"
+                    >
+                        {% for error in form.username.errors %}{{ error }}{% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {# Manually render password field with M3 Text Field #}
+            <div class="form-field-container">
+                <label
+                    class="mdc-text-field mdc-text-field--outlined {% if form.password.errors %}mdc-text-field--invalid{% endif %}"
+                    id="password-field"
+                >
+                    <span class="mdc-notched-outline">
+                        <span class="mdc-notched-outline__leading"></span>
+                        <span class="mdc-notched-outline__notch">
+                            <span class="mdc-floating-label{% if form.password.value %} mdc-floating-label--float-above{% endif %}" id="password-label">{{ form.password.label }}</span>
+                        </span>
+                        <span class="mdc-notched-outline__trailing"></span>
+                    </span>
+                    <input
+                        class="mdc-text-field__input"
+                        type="password"
+                        name="{{ form.password.html_name }}"
+                        id="{{ form.password.auto_id }}"
+                        aria-labelledby="password-label"
+                        value="{{ form.password.value|default:'' }}"
+                        required
+                    />
+                </label>
+                {# Display field errors for password #}
+                {% if form.password.errors %}
+                <div class="mdc-text-field-helper-line">
+                    <div
+                        class="mdc-text-field-helper-text mdc-text-field-helper-text--validation-msg"
+                        aria-hidden="true"
+                    >
+                        {% for error in form.password.errors %}{{ error }}{% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {# Submit Button #}
+            <div class="submit-button-container">
+                <button type="submit" class="mdc-button mdc-button--raised">
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Login</span>
+                </button>
+            </div>
+        </form>
+
+        {# Link to Registration Page #}
+        <div class="register-link-container mdc-typography--body2">
+            Don't have an account?
+            <a href="{% url 'register' %}" class="mdc-button mdc-button--text">
+                <span class="mdc-button__ripple"></span>
+                <span class="mdc-button__label">Register here</span>
+            </a>
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Material Design Components text fields
+        document.querySelectorAll(".mdc-text-field").forEach(function(textField) {
+            if (textField) {
+                mdc.textField.MDCTextField.attachTo(textField);
+            }
+        });
+
+        // Ensure labels are properly positioned if fields have values
+        document.querySelectorAll('.mdc-text-field__input').forEach(function(input) {
+            if (input.value) {
+                const label = input.closest('.mdc-text-field').querySelector('.mdc-floating-label');
+                if (label) {
+                    label.classList.add('mdc-floating-label--float-above');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
