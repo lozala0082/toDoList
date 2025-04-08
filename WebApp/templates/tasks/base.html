@@ -65,6 +65,62 @@
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
 
+            /* Cat mascot styling */
+            .cat-mascot {
+                position: fixed;
+                bottom: 16px;
+                right: 16px;
+                width: 64px;
+                height: 64px;
+                z-index: 90;
+                filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06));
+                transition: transform 0.3s ease;
+                cursor: pointer;
+            }
+
+            .cat-mascot:hover {
+                transform: scale(1.1);
+            }
+
+            .cat-mascot-svg {
+                width: 100%;
+                height: 100%;
+            }
+
+            /* Message bubble styling */
+            .cat-message-bubble {
+                position: absolute;
+                bottom: 70px;
+                right: 0;
+                background-color: white;
+                border-radius: 12px;
+                padding: 12px 16px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                width: 220px;
+                font-size: 14px;
+                color: #333;
+                opacity: 0;
+                transform: translateY(10px);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                pointer-events: none;
+                z-index: 91;
+            }
+
+            .cat-message-bubble:after {
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                right: 20px;
+                border-width: 10px 10px 0;
+                border-style: solid;
+                border-color: white transparent transparent;
+            }
+
+            .cat-message-bubble.show-message {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
             /* Style for message flashes */
             .user-message {
                 padding: 16px;
@@ -170,6 +226,8 @@
 
         <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
 
+        {% load static %}
+        <script src="{% static 'js/cat_mascots.js' %}"></script>
         <script>
             // Auto-init all components
             window.mdc.autoInit();

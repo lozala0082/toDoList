@@ -18,13 +18,7 @@
         padding: 16px;
     }
 
-    /* Cat image styling */
-    .bosscat-image {
-        max-width: 200px;
-        margin-bottom: 24px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+
     .register-card {
         width: 100%;
         max-width: 450px; /* Slightly wider potentially */
@@ -74,7 +68,7 @@
 
 {% block content %}
 <div class="register-container">
-    <img src="{% static 'images/bosscat.png' %}" alt="Boss Cat" class="bosscat-image">
+    {% include "tasks/partials/cat_mascot.html" with image_name="bosscat.png" alt_text="Boss Cat" cat_type="bosscat" %}
     <div class="mdc-card register-card mdc-card--outlined">
         <h2 class="mdc-typography--headline5">Create Account</h2>
 

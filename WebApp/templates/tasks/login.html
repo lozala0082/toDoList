@@ -19,13 +19,7 @@
         padding: 24px;
     }
 
-    /* Cat image styling */
-    .bosscat-image {
-        max-width: 200px;
-        margin-bottom: 24px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+
     .login-card h2 {
         margin-bottom: 24px;
         text-align: center;
@@ -63,7 +57,7 @@
 
 {% block content %}
 <div class="login-container">
-    <img src="{% static 'images/bosscat.png' %}" alt="Boss Cat" class="bosscat-image">
+    {% include "tasks/partials/cat_mascot.html" with image_name="bosscat.png" alt_text="Boss Cat" cat_type="bosscat" %}
     <div class="mdc-card login-card mdc-card--outlined">
         <h2 class="mdc-typography--headline5">Login</h2>
 
