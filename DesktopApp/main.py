@@ -32,129 +32,180 @@ class TaskManagementApp:
     def show_login(self):
         # Clears anything before getting into this new function
         self.clear_window()
-        # Brings the window to fullscreen
-        self.root.state('zoomed')  # This simulates the maximize button being clicked
+        # Brings the window to fullscreen - cross-platform approach
+        self.maximize_window()
 
-        # Name of Application Widget
-        # -------------------------------------------------------------------------
-        name_label = Label(self.root, text="The To Do List", font=("Comic Sans MS", 40, "bold"))
-        name_label.place(x=400, y=200)
-        # -------------------------------------------------------------------------
+        # Main container frame
+        main_frame = ttk.Frame(self.root, padding="20")
+        main_frame.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
 
-        # Logo Image Widget
-        # -------------------------------------------------------------------------
+        # Configure grid weights to center content
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
 
-        self.logoimage = Image.open(os.path.join(os.path.dirname(__file__), "todolist.png"))  # Using correct path
-        self.logoimage = self.logoimage.resize((100, 100), Image.Resampling.LANCZOS)
+        # Create a header frame for the title and logo
+        header_frame = ttk.Frame(main_frame)
+        header_frame.grid(row=0, column=0, columnspan=3, pady=(0, 20), sticky=(tk.N, tk.E, tk.W))
 
-        # Convert the image to a Tkinter-compatible format
+        # Title with logo
+        title_frame = ttk.Frame(header_frame)
+        title_frame.pack(expand=True)
+
+        # App title
+        name_label = ttk.Label(title_frame, text="The To Do List", font=("Comic Sans MS", 40, "bold"))
+        name_label.grid(row=0, column=0, padx=(0, 10))
+
+        # Logo Image
+        self.logoimage = Image.open(os.path.join(os.path.dirname(__file__), "todolist.png"))
+        self.logoimage = self.logoimage.resize((80, 80), Image.Resampling.LANCZOS)
         self.logophoto = ImageTk.PhotoImage(self.logoimage)
+        logo_pic_label = ttk.Label(title_frame, image=self.logophoto)
+        logo_pic_label.grid(row=0, column=1)
 
-        # Create a Label widget to hold the image
-        logo_pic_label = Label(self.root, image=self.logophoto)
-        logo_pic_label.place(x=800, y=188)
-        # -------------------------------------------------------------------------
+        # Create a content frame for the login form
+        content_frame = ttk.Frame(main_frame)
+        content_frame.grid(row=1, column=1, sticky=(tk.N, tk.S, tk.E, tk.W))
 
-        # Boss Image Widget
-        # -------------------------------------------------------------------------
+        # Login form frame
+        login_frame = ttk.LabelFrame(content_frame, text="Login", padding="20")
+        login_frame.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
+
+        # Username field
+        username_label = ttk.Label(login_frame, text="Username:", font=("Arial", 12))
+        username_label.grid(row=0, column=0, sticky=tk.W, pady=5)
+
+        username_entry = ttk.Entry(login_frame, font=("Arial", 12), width=25)
+        username_entry.grid(row=0, column=1, sticky=(tk.E, tk.W), pady=5, padx=(10, 0))
+
+        # Password field
+        password_label = ttk.Label(login_frame, text="Password:", font=("Arial", 12))
+        password_label.grid(row=1, column=0, sticky=tk.W, pady=5)
+
+        password_entry = ttk.Entry(login_frame, font=("Arial", 12), width=25, show="*")
+        password_entry.grid(row=1, column=1, sticky=(tk.E, tk.W), pady=5, padx=(10, 0))
+
+        # Buttons frame
+        button_frame = ttk.Frame(login_frame)
+        button_frame.grid(row=2, column=0, columnspan=2, pady=(20, 0))
+
+        # Login button
+        login_button = ttk.Button(button_frame, text="Login", command=lambda: self.login(username_entry.get(), password_entry.get()))
+        login_button.grid(row=0, column=0, padx=(0, 10))
+
+        # Create account button
+        create_button = ttk.Button(button_frame, text="Create New Account", command=self.show_register)
+        create_button.grid(row=0, column=1)
+
+        # Configure content frame weights
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.columnconfigure(1, weight=2)
+        main_frame.columnconfigure(2, weight=1)
+        main_frame.rowconfigure(1, weight=1)
+
+        # Left side - Boss Cat image
+        left_frame = ttk.Frame(main_frame)
+        left_frame.grid(row=1, column=0, sticky=(tk.S, tk.W))
+
         self.bossimage = Image.open(os.path.join(os.path.dirname(__file__), "bosscat.png"))
-        self.bossimage = self.bossimage.resize((200, 200), Image.Resampling.LANCZOS)
-
-        # Convert the image to a Tkinter-compatible format
+        self.bossimage = self.bossimage.resize((180, 180), Image.Resampling.LANCZOS)
         self.bossphoto = ImageTk.PhotoImage(self.bossimage)
+        boss_pic_label = ttk.Label(left_frame, image=self.bossphoto)
+        boss_pic_label.pack(side=tk.BOTTOM, anchor=tk.SW)
 
-        # Create a Label widget to hold the image
-        boss_pic_label = Label(self.root, image=self.bossphoto)
-        boss_pic_label.place(x=-5, y=470)
-        # -------------------------------------------------------------------------
+        # Right side - Text bubble image
+        right_frame = ttk.Frame(main_frame)
+        right_frame.grid(row=1, column=2, sticky=(tk.S, tk.E))
 
-        # Textbox Image Widget
-        # -------------------------------------------------------------------------
         self.textboximage = Image.open(os.path.join(os.path.dirname(__file__), "textbox.png"))
-        self.textboximage = self.textboximage.resize((200, 200), Image.Resampling.LANCZOS)
-
-        # Convert the image to a Tkinter-compatible format
+        self.textboximage = self.textboximage.resize((180, 180), Image.Resampling.LANCZOS)
         self.textphoto = ImageTk.PhotoImage(self.textboximage)
-
-        # Create a Label widget to hold the image
-        text_pic_label = Label(self.root, image=self.textphoto)
-        text_pic_label.place(x=200, y=380)
-        # -------------------------------------------------------------------------
-
-        # Username and password login
-        # -------------------------------------------------------------------------
-        username_label = Label(self.root, text="Username:", font=("Arial", 14))
-        username_label.place(x=500, y=300)
-
-        username_entry = Entry(self.root, font=("Arial", 14), width=20)
-        username_entry.place(x=600, y=300)
-
-        password_label = Label(self.root, text="Password:", font=("Arial", 14))
-        password_label.place(x=500, y=350)
-
-        password_entry = Entry(self.root, font=("Arial", 14), width=20, show="*")  # 'show' hides the password
-        password_entry.place(x=600, y=350)
-
-
-        # Create the Login button
-        # -------------------------------------------------------------------------
-        login_button = Button(self.root, text="Login", font=("Arial", 14), command=lambda: self.login(username_entry.get(), password_entry.get()))
-        login_button.place(x=500, y=400)
-        # -------------------------------------------------------------------------
-
-
-        # Create user account
-        # -------------------------------------------------------------------------
-        # Create the create button
-        create_button = Button(self.root, text="Create New Account", font=("Arial", 14), command=self.show_register)
-        create_button.place(x=600, y=400)
-        # -------------------------------------------------------------------------
+        text_pic_label = ttk.Label(right_frame, image=self.textphoto)
+        text_pic_label.pack(side=tk.BOTTOM, anchor=tk.SE)
 
     def show_register(self):
         self.clear_window()
-        # Brings the window to fullscreen
-        self.root.state('zoomed')  # This simulates the maximize button being clicked
+        # Brings the window to fullscreen - cross-platform approach
+        self.maximize_window()
 
-        create_message_label = Label(self.root, text="Enter Your Information Below:", font=("Comic Sans MS", 30, "bold"))
-        create_message_label.place(x=380, y=200)
+        # Main container frame
+        main_frame = ttk.Frame(self.root, padding="20")
+        main_frame.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
 
-        #firstname_label = Label(self.root, text="First Name:", font=("Arial", 14))
-        #firstname_label.place(x=500, y=350)
+        # Configure grid weights to center content
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
 
-        #first_name_entry = Entry(self.root, font=("Arial", 14), width=20)
-        #first_name_entry.place(x=660, y=350)
+        # Create a header frame for the title
+        header_frame = ttk.Frame(main_frame)
+        header_frame.grid(row=0, column=0, columnspan=3, pady=(0, 20), sticky=(tk.N, tk.E, tk.W))
 
-        #lastname_label = Label(self.root, text="Last Name:", font=("Arial", 14))
-        #lastname_label.place(x=500, y=400)
+        # Title frame
+        title_frame = ttk.Frame(header_frame)
+        title_frame.pack(expand=True)
 
-        #last_name_entry = Entry(self.root, font=("Arial", 14), width=20)
-        #last_name_entry.place(x=660, y=400)
+        # Registration title
+        create_message_label = ttk.Label(title_frame, text="Create New Account", font=("Comic Sans MS", 30, "bold"))
+        create_message_label.pack()
 
-        create_user_label = Label(self.root, text="Create Username:", font=("Arial", 14))
-        create_user_label.place(x=480, y=300)
+        # Create a content frame for the registration form
+        content_frame = ttk.Frame(main_frame)
+        content_frame.grid(row=1, column=1, sticky=(tk.N, tk.S, tk.E, tk.W))
 
-        create_user_entry = Entry(self.root, font=("Arial", 14), width=20)
-        create_user_entry.place(x=650, y=300)
+        # Registration form frame
+        register_frame = ttk.LabelFrame(content_frame, text="Enter Your Information", padding="20")
+        register_frame.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
 
-        create_psswrd_label = Label(self.root, text="Create Password:", font=("Arial", 14))
-        create_psswrd_label.place(x=480, y=350)
+        # Username field
+        create_user_label = ttk.Label(register_frame, text="Create Username:", font=("Arial", 12))
+        create_user_label.grid(row=0, column=0, sticky=tk.W, pady=5)
 
-        create_psswrd_entry = Entry(self.root, font=("Arial", 14), width=20, show='*')
-        create_psswrd_entry.place(x=650, y=350)
+        create_user_entry = ttk.Entry(register_frame, font=("Arial", 12), width=25)
+        create_user_entry.grid(row=0, column=1, sticky=(tk.E, tk.W), pady=5, padx=(10, 0))
 
-        confirm_psswrd_label = Label(self.root, text="Confirm Password:", font=("Arial", 14))
-        confirm_psswrd_label.place(x=480, y=400)
+        # Password field
+        create_psswrd_label = ttk.Label(register_frame, text="Create Password:", font=("Arial", 12))
+        create_psswrd_label.grid(row=1, column=0, sticky=tk.W, pady=5)
 
-        confirm_psswrd_entry = Entry(self.root, font=("Arial", 14), width=20, show='*')
-        confirm_psswrd_entry.place(x=650, y=400)
+        create_psswrd_entry = ttk.Entry(register_frame, font=("Arial", 12), width=25, show="*")
+        create_psswrd_entry.grid(row=1, column=1, sticky=(tk.E, tk.W), pady=5, padx=(10, 0))
 
-        # Send the info to create_accounts function so it can append the info to the sql database
-        register_account_button = Button(self.root, text="Register Account", font=("Arial", 14), command=lambda: self.register(create_user_entry.get(), create_psswrd_entry.get(), confirm_psswrd_entry.get()))
-        register_account_button.place(x=710, y=450)
+        # Confirm Password field
+        confirm_psswrd_label = ttk.Label(register_frame, text="Confirm Password:", font=("Arial", 12))
+        confirm_psswrd_label.grid(row=2, column=0, sticky=tk.W, pady=5)
 
-        # Go Back to the main log in
-        go_back_button = Button(self.root, text="Go Back", font=("Arial", 14),command=self.show_login)
-        go_back_button.place(x=600, y=450)
+        confirm_psswrd_entry = ttk.Entry(register_frame, font=("Arial", 12), width=25, show="*")
+        confirm_psswrd_entry.grid(row=2, column=1, sticky=(tk.E, tk.W), pady=5, padx=(10, 0))
+
+        # Buttons frame
+        button_frame = ttk.Frame(register_frame)
+        button_frame.grid(row=3, column=0, columnspan=2, pady=(20, 0))
+
+        # Go Back button
+        go_back_button = ttk.Button(button_frame, text="Go Back", command=self.show_login)
+        go_back_button.grid(row=0, column=0, padx=(0, 10))
+
+        # Register button
+        register_account_button = ttk.Button(button_frame, text="Register Account",
+                                           command=lambda: self.register(create_user_entry.get(),
+                                                                         create_psswrd_entry.get(),
+                                                                         confirm_psswrd_entry.get()))
+        register_account_button.grid(row=0, column=1)
+
+        # Configure content frame weights
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.columnconfigure(1, weight=2)
+        main_frame.columnconfigure(2, weight=1)
+        main_frame.rowconfigure(1, weight=1)
+
+        # Left side - Boss Cat image (reuse from login screen)
+        left_frame = ttk.Frame(main_frame)
+        left_frame.grid(row=1, column=0, sticky=(tk.S, tk.W))
+
+        self.bossimage = Image.open(os.path.join(os.path.dirname(__file__), "bosscat.png"))
+        self.bossimage = self.bossimage.resize((180, 180), Image.Resampling.LANCZOS)
+        self.bossphoto = ImageTk.PhotoImage(self.bossimage)
+        boss_pic_label = ttk.Label(left_frame, image=self.bossphoto)
+        boss_pic_label.pack(side=tk.BOTTOM, anchor=tk.SW)
 
 
     def show_main_window(self):
@@ -449,6 +500,15 @@ class TaskManagementApp:
     def clear_window(self):
         for widget in self.root.winfo_children():
             widget.destroy()
+
+    # Cross-platform method to maximize the window
+    def maximize_window(self):
+        # Get screen width and height
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        # Set window size to screen size
+        self.root.geometry(f"{screen_width}x{screen_height}+0+0")
 
     def run(self):
         self.root.mainloop()
