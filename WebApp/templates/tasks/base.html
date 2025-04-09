@@ -121,30 +121,44 @@
                 transform: translateY(0);
             }
 
-            /* Style for message flashes */
-            .user-message {
-                padding: 16px;
-                margin: 16px;
-                border-radius: 4px;
-                background-color: var(--mdc-theme-surface);
-                color: var(--mdc-theme-on-surface);
-                border: 1px solid rgba(0, 0, 0, 0.12);
+            /* Style for snackbar messages */
+            .mdc-snackbar {
+                z-index: 100;
             }
-            .user-message.success {
-                background-color: #e8f5e9;
-                border-color: #c8e6c9;
+
+            /* Default snackbar styling */
+            .mdc-snackbar .mdc-snackbar__surface {
+                background-color: #333333;
+                color: white;
             }
-            .user-message.error {
-                background-color: #fce8e6;
-                border-color: #f4c7c3;
+
+            /* Success message styling */
+            .mdc-snackbar.success .mdc-snackbar__surface {
+                background-color: #4caf50;
+                color: white;
             }
-            .user-message.warning {
-                background-color: #fff8e1;
-                border-color: #ffe082;
+
+            /* Error message styling */
+            .mdc-snackbar.error .mdc-snackbar__surface {
+                background-color: #f44336;
+                color: white;
             }
-            .user-message.info {
-                background-color: #e3f2fd;
-                border-color: #90caf9;
+
+            /* Warning message styling */
+            .mdc-snackbar.warning .mdc-snackbar__surface {
+                background-color: #ff9800;
+                color: black;
+            }
+
+            /* Info message styling */
+            .mdc-snackbar.info .mdc-snackbar__surface {
+                background-color: #2196f3;
+                color: white;
+            }
+
+            /* Minimal styling for hidden fallback messages */
+            .message-fallback-container {
+                display: none; /* Keep this hidden */
             }
         </style>
 
@@ -217,11 +231,35 @@
         </header>
 
         <div class="mdc-top-app-bar--fixed-adjust main-content-area">
-            {% if messages %} {% for message in messages %} {# Basic message
-            styling, consider replacing with MDC Banner or Snackbar later #}
-            <div class="user-message {{ message.tags }}">{{ message }}</div>
-            {% endfor %} {% endif %} {% block content %} {# Page-specific
-            content goes here #} {% endblock %}
+            <!-- Hidden fallback for messages - helps with message processing but not visible to users -->
+            {% if messages %}
+                <div class="message-fallback-container" style="display: none;">
+                    {% for message in messages %}
+                        <div class="message-fallback {{ message.tags }}" data-message="{{ message|escapejs }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}
+                {% comment %}Page-specific content goes here{% endcomment %}
+            {% endblock %}
+        </div>
+
+        <!-- Snackbar for messages -->
+        <div id="message-snackbar" class="mdc-snackbar">
+            <div class="mdc-snackbar__surface" role="status" aria-relevant="additions">
+                <div class="mdc-snackbar__label" aria-atomic="false">
+                    <!-- Message text will be inserted here -->
+                </div>
+                <div class="mdc-snackbar__actions" aria-atomic="true">
+                    <button type="button" class="mdc-button mdc-snackbar__action">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">OK</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
@@ -251,6 +289,42 @@
                 const topAppBarElement = document.querySelector('.mdc-top-app-bar');
                 if (topAppBarElement) {
                     mdc.topAppBar.MDCTopAppBar.attachTo(topAppBarElement);
+                }
+
+                // Initialize snackbar
+                const snackbarElement = document.querySelector('.mdc-snackbar');
+                if (snackbarElement) {
+                    const snackbar = mdc.snackbar.MDCSnackbar.attachTo(snackbarElement);
+
+                    // Configure snackbar
+                    snackbar.timeoutMs = 5000; // Show for 5 seconds
+                    snackbar.closeOnEscape = true; // Allow closing with Escape key
+
+                    // Show messages in snackbar if any
+                    const fallbackMessages = document.querySelectorAll('.message-fallback');
+                    if (fallbackMessages.length > 0) {
+                        // Get the first message
+                        const firstMessage = fallbackMessages[0];
+                        const messageText = firstMessage.textContent.trim();
+                        const messageType = firstMessage.classList.contains('success') ? 'success' :
+                                          firstMessage.classList.contains('error') ? 'error' :
+                                          firstMessage.classList.contains('warning') ? 'warning' :
+                                          firstMessage.classList.contains('info') ? 'info' : '';
+
+                        // Set snackbar label text
+                        snackbarElement.querySelector('.mdc-snackbar__label').textContent = messageText;
+
+                        // Add appropriate class based on message type
+                        snackbarElement.classList.remove('success', 'error', 'warning', 'info');
+                        if (messageType) {
+                            snackbarElement.classList.add(messageType);
+                        }
+
+                        // Show the snackbar
+                        snackbar.open();
+
+                        console.log('Showing message in snackbar:', messageText);
+                    }
                 }
             });
         </script>

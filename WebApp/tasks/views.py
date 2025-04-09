@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
@@ -130,13 +130,18 @@ def update_status(request, pk):
         'status_choices': Assignment.STATUS_CHOICES
     })
 
-def register(request):
+def register_view(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
+
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Account created successfully! You can now log in.')
-            return redirect('login')
+            try:
+                form.save()
+                messages.success(request, 'Account created successfully! You can now log in.')
+                return redirect('login')
+            except Exception as e:
+                messages.error(request, f"Error creating account: {str(e)}")
     else:
         form = UserRegistrationForm()
-    return render(request, 'tasks/register.html', {'form': form})
+
+    return render(request, 'tasks/register_form.html', {'form': form})

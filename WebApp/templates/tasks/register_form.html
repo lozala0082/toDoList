@@ -1,0 +1,77 @@
+{% extends "tasks/base.html" %}
+{% load static %}
+
+{% block title %}Register - Task Manager{% endblock %}
+
+{% block page_title %}Register{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 50px auto; padding: 20px; background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2>Create Account</h2>
+    
+    <form method="POST" action="{% url 'register' %}">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div style="color: red; margin-bottom: 15px;">
+            {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div style="margin-bottom: 15px;">
+            <label for="id_username">Username:</label>
+            <input type="text" name="username" id="id_username" required style="width: 100%; padding: 8px; margin-top: 5px;">
+            {% if form.username.errors %}
+            <div style="color: red; font-size: 0.8em; margin-top: 5px;">
+                {% for error in form.username.errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="id_email">Email:</label>
+            <input type="email" name="email" id="id_email" required style="width: 100%; padding: 8px; margin-top: 5px;">
+            {% if form.email.errors %}
+            <div style="color: red; font-size: 0.8em; margin-top: 5px;">
+                {% for error in form.email.errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="id_password1">Password:</label>
+            <input type="password" name="password1" id="id_password1" required style="width: 100%; padding: 8px; margin-top: 5px;">
+            {% if form.password1.errors %}
+            <div style="color: red; font-size: 0.8em; margin-top: 5px;">
+                {% for error in form.password1.errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+            <div style="font-size: 0.8em; margin-top: 5px; color: #666;">
+                No password requirements - use any password you like.
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="id_password2">Confirm Password:</label>
+            <input type="password" name="password2" id="id_password2" required style="width: 100%; padding: 8px; margin-top: 5px;">
+            {% if form.password2.errors %}
+            <div style="color: red; font-size: 0.8em; margin-top: 5px;">
+                {% for error in form.password2.errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button type="submit" style="background-color: #6200ee; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                Register
+            </button>
+        </div>
+    </form>
+    
+    <div style="margin-top: 15px; text-align: center;">
+        <p>Already have an account? <a href="{% url 'login' %}" style="color: #6200ee; text-decoration: none;">Login here</a></p>
+    </div>
+</div>
+{% endblock %}
