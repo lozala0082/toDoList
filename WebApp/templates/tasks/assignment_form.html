@@ -221,7 +221,7 @@
 {% block content %}
 <div class="form-container">
     <div class="mdc-card form-card mdc-card--outlined">
-        <form method="POST" novalidate>
+        <form method="POST" novalidate id="assignment-form">
             {% csrf_token %}
 
             {# Display non-field errors #}
@@ -288,13 +288,41 @@
                         name="{{ field.name }}"
                         id="{{ field.id_for_label }}"
                         aria-labelledby="{{ field.id_for_label }}-label"
-                        {% if field.field.required %}required{% endif %}
+                        required
                         value="{% if field.value %}{{ field.value|date:'Y-m-d' }}{% endif %}"
+                        oninvalid="this.setCustomValidity('Please select a due date')"
+                        oninput="this.setCustomValidity('')"
                     />
                 </label>
                 {% include "tasks/partials/form_field_errors.html" with field=field %}
                 {% endwith %}
             </div>
+
+            {# Status Field (ChoiceField -> mdc-select) - Only shown when editing existing assignments #}
+            {% if form.instance.pk %}
+            <div class="form-field-container">
+                {% with field=form.status %}
+                <label class="mdc-text-field mdc-text-field--outlined {{ field.css_classes }}">
+                    <span class="mdc-notched-outline">
+                        <span class="mdc-notched-outline__leading"></span>
+                        <span class="mdc-notched-outline__notch">
+                            <span class="mdc-floating-label" id="{{ field.id_for_label }}-label">{% firstof field.label field.name|capfirst %}</span>
+                        </span>
+                        <span class="mdc-notched-outline__trailing"></span>
+                    </span>
+                    <select class="mdc-text-field__input" name="{{ field.name }}" id="{{ field.id_for_label }}">
+                        {% for choice in field.field.choices %}
+                        <option value="{{ choice.0 }}" {% if field.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                {% include "tasks/partials/form_field_errors.html" with field=field %}
+                {% endwith %}
+            </div>
+            {% else %}
+            {# For new assignments, include the status as a hidden field with default value 'Not Started' #}
+            <input type="hidden" name="status" value="Not Started">
+            {% endif %}
 
             {# Description Field (TextField -> mdc-text-field--textarea) #}
             <div class="form-field-container">
@@ -492,8 +520,17 @@
             // If advanced mode is enabled, disable the status field
             if (statusField && statusFieldContainer) {
                 if (this.checked) {
-                    statusField.disabled = true;
+                    // Instead of disabling the field (which prevents it from being submitted),
+                    // we'll make it readonly and add a hidden field with the same value
+                    statusField.readOnly = true;
                     statusField.parentElement.classList.add('mdc-text-field--disabled');
+
+                    // Create a hidden backup field to ensure the value is submitted
+                    const hiddenStatusField = document.createElement('input');
+                    hiddenStatusField.type = 'hidden';
+                    hiddenStatusField.name = 'status_backup';
+                    hiddenStatusField.value = statusField.value;
+                    statusField.parentElement.appendChild(hiddenStatusField);
 
                     // Add help text explaining why it's disabled
                     let helpText = document.createElement('p');
@@ -508,8 +545,15 @@
                         statusFieldContainer.appendChild(helpText);
                     }
                 } else {
-                    statusField.disabled = false;
+                    // Remove readonly state
+                    statusField.readOnly = false;
                     statusField.parentElement.classList.remove('mdc-text-field--disabled');
+
+                    // Remove the hidden backup field if it exists
+                    const hiddenStatusField = statusField.parentElement.querySelector('input[name="status_backup"]');
+                    if (hiddenStatusField) {
+                        hiddenStatusField.remove();
+                    }
 
                     // Remove the help text
                     const helpText = statusFieldContainer.querySelector('.status-help-text');
@@ -523,6 +567,81 @@
         // Trigger the change event to initialize the state
         if (advancedModeSwitch.checked) {
             advancedModeSwitch.dispatchEvent(new Event('change'));
+        }
+
+        // Add form submission handling to prevent losing data
+        const assignmentForm = document.getElementById('assignment-form');
+        const dueDateField = document.getElementById('id_due_date');
+
+        // Store the due date in localStorage when it changes
+        if (dueDateField) {
+            dueDateField.addEventListener('change', function() {
+                localStorage.setItem('assignment_due_date', this.value);
+            });
+
+            // Restore from localStorage if empty and we have a saved value
+            if (!dueDateField.value && localStorage.getItem('assignment_due_date')) {
+                dueDateField.value = localStorage.getItem('assignment_due_date');
+            }
+        }
+
+        // Handle form submission
+        if (assignmentForm) {
+            assignmentForm.addEventListener('submit', function(e) {
+                // Store form data in localStorage before submission
+                const formData = new FormData(assignmentForm);
+                const nameField = document.getElementById('id_name');
+                const dueDateField = document.getElementById('id_due_date');
+
+                if (nameField && nameField.value) {
+                    localStorage.setItem('assignment_name', nameField.value);
+                }
+
+                if (dueDateField && dueDateField.value) {
+                    localStorage.setItem('assignment_due_date', dueDateField.value);
+                }
+
+                // Make sure all required fields are filled
+                const requiredFields = assignmentForm.querySelectorAll('[required]');
+                let hasErrors = false;
+
+                requiredFields.forEach(field => {
+                    if (!field.value) {
+                        hasErrors = true;
+                        // Add error styling
+                        const fieldContainer = field.closest('.form-field-container');
+                        if (fieldContainer) {
+                            if (!fieldContainer.querySelector('.error-message')) {
+                                const errorMsg = document.createElement('div');
+                                errorMsg.className = 'errorlist error-message';
+                                errorMsg.textContent = 'This field is required.';
+                                fieldContainer.appendChild(errorMsg);
+                            }
+                        }
+                    }
+                });
+
+                if (hasErrors) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // If form is valid, we'll clear localStorage after successful submission
+                // in the success callback
+                return true;
+            });
+
+            // Restore form data from localStorage if available
+            const nameField = document.getElementById('id_name');
+            const dueDateField = document.getElementById('id_due_date');
+
+            if (nameField && !nameField.value && localStorage.getItem('assignment_name')) {
+                nameField.value = localStorage.getItem('assignment_name');
+            }
+
+            if (dueDateField && !dueDateField.value && localStorage.getItem('assignment_due_date')) {
+                dueDateField.value = localStorage.getItem('assignment_due_date');
+            }
         }
 
         // Add subtask button functionality

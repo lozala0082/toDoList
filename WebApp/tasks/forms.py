@@ -141,8 +141,19 @@ class AssignmentForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        # Set default status to 'Not Started' for new assignments
+        if 'initial' not in kwargs:
+            kwargs['initial'] = {}
+        if 'status' not in kwargs.get('initial', {}):
+            kwargs['initial']['status'] = 'Not Started'
+
         super().__init__(*args, **kwargs)
         self.subtask_formset = None
+
+        # Hide the status field for new assignments - they always start as 'Not Started'
+        if not self.instance.pk:  # This is a new assignment
+            self.fields['status'].widget = forms.HiddenInput()
+            self.fields['status'].initial = 'Not Started'
 
         # If this is an existing assignment with subtasks, enable advanced mode by default
         if self.instance.pk and hasattr(self.instance, 'subtasks') and self.instance.subtasks.exists():
@@ -159,6 +170,24 @@ class AssignmentForm(forms.ModelForm):
             return valid and self.subtask_formset.is_valid()
 
         return valid
+
+    def clean(self):
+        """Custom clean method to ensure all required fields are present"""
+        cleaned_data = super().clean()
+
+        # Make sure due_date is present
+        if 'due_date' not in cleaned_data or not cleaned_data['due_date']:
+            self.add_error('due_date', 'Due date is required')
+
+        # Make sure name is present
+        if 'name' not in cleaned_data or not cleaned_data['name']:
+            self.add_error('name', 'Name is required')
+
+        # Print debug info
+        print("Form data:", self.data)
+        print("Cleaned data:", cleaned_data)
+
+        return cleaned_data
 
     def save(self, commit=True):
         """Save the assignment and its subtasks if advanced mode is enabled"""

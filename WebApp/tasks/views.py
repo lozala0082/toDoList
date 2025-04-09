@@ -128,6 +128,15 @@ class AssignmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         # Set the creator
         form.instance.creator = self.request.user
 
+        # For new assignments, always set status to 'Not Started'
+        if not form.instance.pk:
+            form.instance.status = 'Not Started'
+
+        # Check for status_backup field (used when status field is readonly)
+        status_backup = self.request.POST.get('status_backup')
+        if status_backup and form.cleaned_data.get('advanced_mode'):
+            form.instance.status = status_backup
+
         # Check if advanced mode is enabled
         if form.cleaned_data.get('advanced_mode'):
             if subtask_formset.is_valid():
@@ -157,6 +166,19 @@ class AssignmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def test_func(self):
         return self.request.user.is_staff
+
+    def form_invalid(self, form):
+        # Add debug information to help identify the issue
+        print("Form validation errors:", form.errors)
+
+        # If there's a subtask formset, check its errors too
+        context = self.get_context_data()
+        if 'subtask_formset' in context:
+            subtask_formset = context['subtask_formset']
+            if not subtask_formset.is_valid():
+                print("Subtask formset errors:", subtask_formset.errors)
+
+        return super().form_invalid(form)
 
 class AssignmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Assignment
@@ -196,6 +218,19 @@ class AssignmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         return self.request.user.is_staff
+
+    def form_invalid(self, form):
+        # Add debug information to help identify the issue
+        print("Form validation errors:", form.errors)
+
+        # If there's a subtask formset, check its errors too
+        context = self.get_context_data()
+        if 'subtask_formset' in context:
+            subtask_formset = context['subtask_formset']
+            if not subtask_formset.is_valid():
+                print("Subtask formset errors:", subtask_formset.errors)
+
+        return super().form_invalid(form)
 
 class AssignmentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Assignment
