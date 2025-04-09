@@ -491,6 +491,8 @@
 {% endblock %}
 
 {% block extra_scripts %}
+{% load static %}
+<script src="{% static 'js/direct-form-storage.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Ensure Text Fields are initialized
@@ -569,38 +571,12 @@
             advancedModeSwitch.dispatchEvent(new Event('change'));
         }
 
-        // Add form submission handling to prevent losing data
+        // Form storage and validation is now handled by direct-form-storage.js
         const assignmentForm = document.getElementById('assignment-form');
-        const dueDateField = document.getElementById('id_due_date');
 
-        // Store the due date in localStorage when it changes
-        if (dueDateField) {
-            dueDateField.addEventListener('change', function() {
-                localStorage.setItem('assignment_due_date', this.value);
-            });
-
-            // Restore from localStorage if empty and we have a saved value
-            if (!dueDateField.value && localStorage.getItem('assignment_due_date')) {
-                dueDateField.value = localStorage.getItem('assignment_due_date');
-            }
-        }
-
-        // Handle form submission
+        // Handle form submission for validation only
         if (assignmentForm) {
             assignmentForm.addEventListener('submit', function(e) {
-                // Store form data in localStorage before submission
-                const formData = new FormData(assignmentForm);
-                const nameField = document.getElementById('id_name');
-                const dueDateField = document.getElementById('id_due_date');
-
-                if (nameField && nameField.value) {
-                    localStorage.setItem('assignment_name', nameField.value);
-                }
-
-                if (dueDateField && dueDateField.value) {
-                    localStorage.setItem('assignment_due_date', dueDateField.value);
-                }
-
                 // Make sure all required fields are filled
                 const requiredFields = assignmentForm.querySelectorAll('[required]');
                 let hasErrors = false;
@@ -626,22 +602,8 @@
                     return false;
                 }
 
-                // If form is valid, we'll clear localStorage after successful submission
-                // in the success callback
                 return true;
             });
-
-            // Restore form data from localStorage if available
-            const nameField = document.getElementById('id_name');
-            const dueDateField = document.getElementById('id_due_date');
-
-            if (nameField && !nameField.value && localStorage.getItem('assignment_name')) {
-                nameField.value = localStorage.getItem('assignment_name');
-            }
-
-            if (dueDateField && !dueDateField.value && localStorage.getItem('assignment_due_date')) {
-                dueDateField.value = localStorage.getItem('assignment_due_date');
-            }
         }
 
         // Add subtask button functionality

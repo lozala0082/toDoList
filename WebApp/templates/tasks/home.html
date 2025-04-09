@@ -202,6 +202,17 @@
 
 {% block content %}
 <div class="assignment-list-container">
+    <!-- Display Django messages -->
+    {% if messages %}
+    <div class="messages-container" style="margin-bottom: 16px;">
+        {% for message in messages %}
+        <div class="message {{ message.tags }}" style="padding: 8px 16px; margin-bottom: 8px; border-radius: 4px; {% if message.tags == 'success' %}background-color: #e8f5e9; color: #2e7d32;{% elif message.tags == 'error' %}background-color: #ffebee; color: #c62828;{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <h2 class="mdc-typography--headline5 welcome-message">
         Welcome back, {{ user.username }}!
     </h2>

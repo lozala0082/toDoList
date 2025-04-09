@@ -40,12 +40,18 @@ class HomeView(LoginRequiredMixin, ListView):
             due_date__day=today.day
         ).order_by('due_date')
 
+        # Get assignments due this week, excluding today
         context['weekly_assignments'] = base_queryset.filter(
             due_date__gte=week_start,
             due_date__lt=week_start + timedelta(days=7)
+        ).exclude(
+            due_date__year=today.year,
+            due_date__month=today.month,
+            due_date__day=today.day
         ).order_by('due_date')
 
-        # Get the monthly assignments, excluding those already in today or weekly lists
+        # Get the IDs of assignments already shown in today and weekly sections
+        # to avoid duplication in the monthly section
         today_and_weekly_ids = list(context['today_assignments'].values_list('id', flat=True)) + \
                               list(context['weekly_assignments'].values_list('id', flat=True))
 
@@ -58,9 +64,11 @@ class HomeView(LoginRequiredMixin, ListView):
             due_date__lte=month_end
         ).exclude(id__in=today_and_weekly_ids).order_by('due_date')
 
-        # Get assignments due beyond this month
+        # Get assignments due beyond this month (future months)
+        # First, collect all IDs from today, weekly, and monthly sections to avoid duplication
         all_current_ids = today_and_weekly_ids + list(context['monthly_assignments'].values_list('id', flat=True))
 
+        # Filter assignments due after the end of the current month
         context['future_assignments'] = base_queryset.filter(
             due_date__gt=month_end
         ).exclude(id__in=all_current_ids).order_by('due_date')
@@ -162,6 +170,10 @@ class AssignmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             else:
                 return self.form_invalid(form)
 
+        # Add a success message
+        messages.success(self.request, 'Assignment created successfully!')
+        print('Assignment created successfully, message added to session')
+
         return super().form_valid(form)
 
     def test_func(self):
@@ -213,6 +225,10 @@ class AssignmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 form.subtask_formset = subtask_formset
             else:
                 return self.form_invalid(form)
+
+        # Add a success message
+        messages.success(self.request, 'Assignment updated successfully!')
+        print('Assignment updated successfully, message added to session')
 
         return super().form_valid(form)
 
@@ -272,10 +288,14 @@ def register_view(request):
         if form.is_valid():
             try:
                 form.save()
+                # Add a success message that will be displayed on the login page
                 messages.success(request, 'Account created successfully! You can now log in.')
+                # Print to console for debugging
+                print('Registration successful, message added to session')
                 return redirect('login')
             except Exception as e:
                 messages.error(request, f"Error creating account: {str(e)}")
+                print(f'Registration error: {str(e)}')
     else:
         form = UserRegistrationForm()
 

@@ -4,7 +4,7 @@
  */
 
 import { initializeFormValidation } from '../utils/form-validation.js';
-import { showSuccess, showError } from '../components/snackbar.js';
+import { showSuccess, showError, showWarning } from '../components/snackbar.js';
 
 /**
  * Initialize the assignment form
@@ -13,6 +13,20 @@ import { showSuccess, showError } from '../components/snackbar.js';
 export function initializeAssignmentForm(formId = 'assignment-form') {
     const form = document.getElementById(formId);
     if (!form) return;
+
+    // Check if this is a new form (not an edit form with validation errors)
+    const isNewForm = !form.querySelector('.error-message');
+    if (isNewForm) {
+        // Clear any stored form data to prevent it from being used on a new form
+        const fieldConfig = {
+            'id_due_date': 'assignment_due_date',
+            'id_name': 'assignment_name',
+            'id_description': 'assignment_description',
+            'id_status': 'assignment_status'
+        };
+        Object.values(fieldConfig).forEach(key => localStorage.removeItem(key));
+        console.log('New form detected, cleared localStorage');
+    }
 
     // Initialize form validation
     initializeFormValidation(form);
@@ -23,8 +37,10 @@ export function initializeAssignmentForm(formId = 'assignment-form') {
     // Initialize subtask management
     initializeSubtaskManagement();
 
-    // Initialize form storage
-    initializeFormStorage();
+    // Initialize form storage (only if there are validation errors)
+    if (!isNewForm) {
+        initializeFormStorage();
+    }
 
     // Initialize assignee selection
     initializeAssigneeSelection();
@@ -287,6 +303,14 @@ function initializeAssigneeSelection() {
 function handleFormSubmit(e) {
     const form = e.target;
 
+    // Check if the form is valid
+    if (!form.checkValidity()) {
+        // If not valid, show error message
+        showError('Please fix the errors in the form before submitting.');
+        e.preventDefault(); // Prevent form submission
+        return;
+    }
+
     // Check if advanced mode is enabled
     const advancedModeSwitch = document.getElementById('advanced-mode-switch');
     if (advancedModeSwitch && advancedModeSwitch.checked) {
@@ -300,6 +324,17 @@ function handleFormSubmit(e) {
             }
         }
     }
+
+    // Clear localStorage immediately to prevent it from being used on the next form
+    const fieldConfig = {
+        'id_due_date': 'assignment_due_date',
+        'id_name': 'assignment_name',
+        'id_description': 'assignment_description',
+        'id_status': 'assignment_status'
+    };
+
+    Object.values(fieldConfig).forEach(key => localStorage.removeItem(key));
+    console.log('Form is valid, submitting and clearing localStorage...');
 }
 
 // Initialize when the DOM is loaded

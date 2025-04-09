@@ -150,11 +150,11 @@
     .form-card {
         padding: var(--spacing-md);
     }
-    
+
     .button-container {
         flex-direction: column;
     }
-    
+
     .button-container .mdc-button {
         width: 100%;
     }

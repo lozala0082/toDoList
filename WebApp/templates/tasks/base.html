@@ -16,6 +16,8 @@
             href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
         />
 
+        <link rel="stylesheet" href="{% static 'css/components/snackbar.css' %}" />
+
         <style>
             :root {
                 /* M3 Color Palette */
@@ -125,6 +127,31 @@
             .message-fallback-container {
                 display: none; /* Keep this hidden */
             }
+
+            /* Additional snackbar styling */
+            .mdc-snackbar {
+                z-index: 1000; /* Ensure it's above everything */
+            }
+
+            .mdc-snackbar--success .mdc-snackbar__surface {
+                background-color: #4caf50; /* Green */
+                color: white;
+            }
+
+            .mdc-snackbar--error .mdc-snackbar__surface {
+                background-color: #f44336; /* Red */
+                color: white;
+            }
+
+            .mdc-snackbar--warning .mdc-snackbar__surface {
+                background-color: #ff9800; /* Orange */
+                color: black;
+            }
+
+            .mdc-snackbar--info .mdc-snackbar__surface {
+                background-color: #2196f3; /* Blue */
+                color: white;
+            }
         </style>
 
         {% block extra_head %}{% endblock %}
@@ -212,24 +239,12 @@
             {% endblock %}
         </div>
 
-        <!-- Snackbar for messages -->
-        <div id="message-snackbar" class="mdc-snackbar">
-            <div class="mdc-snackbar__surface" role="status" aria-relevant="additions">
-                <div class="mdc-snackbar__label" aria-atomic="false">
-                    <!-- Message text will be inserted here -->
-                </div>
-                <div class="mdc-snackbar__actions" aria-atomic="true">
-                    <button type="button" class="mdc-button mdc-snackbar__action">
-                        <div class="mdc-button__ripple"></div>
-                        <span class="mdc-button__label">OK</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+        <!-- We're using a custom snackbar implementation in simple-snackbar.js -->
 
         <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
 
         {% load static %}
+        <script src="{% static 'js/simple-snackbar.js' %}"></script>
         <script src="{% static 'js/cat_mascots.js' %}"></script>
         <script type="module" src="{% static 'js/main.js' %}"></script>
         <script>
@@ -257,7 +272,7 @@
                     mdc.topAppBar.MDCTopAppBar.attachTo(topAppBarElement);
                 }
 
-                // Snackbar is initialized via the snackbar.js component
+                // Snackbar is now handled by simple-snackbar.js
             });
         </script>
         {% block extra_scripts %}{% endblock %}

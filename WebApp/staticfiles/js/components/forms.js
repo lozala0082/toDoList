@@ -1,48 +1,48 @@
 /**
- * Task Manager - Forms Component
+ * @fileoverview Task Manager - Forms Component
  * Handles form interactions, validation, and dynamic form elements
  */
 
-import { showError } from './snackbar.js';
+import {showError} from './snackbar.js';
 
 /**
  * Initialize all form components
  */
 function initializeForms() {
-    initializeTextFields();
-    initializeCheckboxes();
-    initializeSelects();
-    initializeAdvancedMode();
-    initializeSubtaskForms();
-    initializeFormValidation();
-    initializeFormStorage();
+  initializeTextFields();
+  initializeCheckboxes();
+  initializeSelects();
+  initializeAdvancedMode();
+  initializeSubtaskForms();
+  initializeFormValidation();
+  initializeFormStorage();
 }
 
 /**
  * Initialize Material Design text fields
  */
 function initializeTextFields() {
-    document.querySelectorAll('.mdc-text-field').forEach(textField => {
-        if (textField) window.mdc.textField.MDCTextField.attachTo(textField);
-    });
+  document.querySelectorAll('.mdc-text-field').forEach(textField => {
+    if (textField) window.mdc.textField.MDCTextField.attachTo(textField);
+  });
 }
 
 /**
  * Initialize Material Design checkboxes
  */
 function initializeCheckboxes() {
-    document.querySelectorAll('.mdc-checkbox').forEach(checkbox => {
-        if (checkbox) window.mdc.checkbox.MDCCheckbox.attachTo(checkbox);
-    });
+  document.querySelectorAll('.mdc-checkbox').forEach(checkbox => {
+    if (checkbox) window.mdc.checkbox.MDCCheckbox.attachTo(checkbox);
+  });
 }
 
 /**
  * Initialize Material Design select menus
  */
 function initializeSelects() {
-    document.querySelectorAll('.mdc-select').forEach(select => {
-        if (select) window.mdc.select.MDCSelect.attachTo(select);
-    });
+  document.querySelectorAll('.mdc-select').forEach(select => {
+    if (select) window.mdc.select.MDCSelect.attachTo(select);
+  });
 }
 
 /**
@@ -272,48 +272,56 @@ function initializeFormValidation() {
 
 /**
  * Initialize form storage for saving form data in localStorage
- * @param {string} formId - The ID of the form element
- * @param {Object} fieldConfig - Configuration for fields to store
+ * @param {string=} formId The ID of the form element
+ * @param {!Object=} fieldConfig Configuration for fields to store
  */
 function initializeFormStorage(formId = 'assignment-form', fieldConfig = {
-    'id_due_date': 'assignment_due_date',
-    'id_name': 'assignment_name',
-    'id_description': 'assignment_description'
+  'id_due_date': 'assignment_due_date',
+  'id_name': 'assignment_name',
+  'id_description': 'assignment_description'
 }) {
-    const form = document.getElementById(formId);
-    if (!form) return;
+  const form = document.getElementById(formId);
+  if (!form) return;
 
-    // Track which fields have been stored
-    const storedFields = [];
+  // Track which fields have been stored
+  const storedFields = [];
 
-    // Process each field in the configuration
-    Object.entries(fieldConfig).forEach(([fieldId, storageKey]) => {
-        const field = document.getElementById(fieldId);
-        if (!field) return;
+  // Check if there are validation errors on the form
+  const hasErrors = form.querySelector('.error-message') !== null;
+  console.log('Form has validation errors:', hasErrors);
 
-        // Store field data in localStorage when it changes
-        field.addEventListener('change', function() {
-            localStorage.setItem(storageKey, this.value);
-        });
+  // Process each field in the configuration
+  Object.entries(fieldConfig).forEach(([fieldId, storageKey]) => {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
 
-        // Restore from localStorage if empty and we have a saved value
-        if (!field.value && localStorage.getItem(storageKey)) {
-            field.value = localStorage.getItem(storageKey);
-        }
-
-        // Add to stored fields list
-        storedFields.push(storageKey);
+    // Store field data in localStorage when it changes
+    field.addEventListener('change', function() {
+      localStorage.setItem(storageKey, this.value);
     });
 
-    // Clear localStorage on successful form submission
-    if (storedFields.length > 0) {
-        form.addEventListener('submit', function() {
-            // We'll clear storage after a short delay to ensure the form was actually submitted
-            setTimeout(() => {
-                storedFields.forEach(key => localStorage.removeItem(key));
-            }, 1000);
-        });
+    // Only restore from localStorage if there are validation errors
+    // or if the field is empty and we have a saved value
+    if (hasErrors && localStorage.getItem(storageKey)) {
+      field.value = localStorage.getItem(storageKey);
     }
+
+    // Add to stored fields list
+    storedFields.push(storageKey);
+  });
+
+  // Clear localStorage on successful form submission
+  if (storedFields.length > 0) {
+    form.addEventListener('submit', function() {
+      // We'll clear storage immediately to prevent it from being used on the next form
+      storedFields.forEach(key => localStorage.removeItem(key));
+    });
+
+    // Also clear storage when the form is loaded if there are no validation errors
+    if (!hasErrors) {
+      storedFields.forEach(key => localStorage.removeItem(key));
+    }
+  }
 }
 
 // Initialize when the DOM is loaded
@@ -321,12 +329,12 @@ document.addEventListener('DOMContentLoaded', initializeForms);
 
 // Export for use in other modules
 export {
-    initializeForms,
-    initializeTextFields,
-    initializeCheckboxes,
-    initializeSelects,
-    initializeAdvancedMode,
-    initializeSubtaskForms,
-    initializeFormStorage,
-    initializeFormValidation
+  initializeForms,
+  initializeTextFields,
+  initializeCheckboxes,
+  initializeSelects,
+  initializeAdvancedMode,
+  initializeSubtaskForms,
+  initializeFormStorage,
+  initializeFormValidation
 };
