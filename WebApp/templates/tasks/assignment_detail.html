@@ -39,6 +39,75 @@
         color: var(--status-completed-color);
     }
 
+    /* Material Design 3 Circular Progress */
+    .md3-circular-progress {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 16px;
+    }
+
+    .md3-circular-progress__determinate-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    .md3-circular-progress__determinate-circle {
+        fill: transparent;
+        stroke-width: 8px;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: center;
+        transition: stroke-dashoffset 0.5s;
+        stroke: #4CAF50; /* Green for completed */
+    }
+
+    .md3-circular-progress__determinate-track {
+        fill: transparent;
+        stroke: #e0e0e0;
+        stroke-width: 8px;
+    }
+
+    .md3-circular-progress__label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 18px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    /* Subtasks styling */
+    .subtasks-container {
+        margin-top: 16px;
+    }
+
+    .subtask-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .subtask-item:last-child {
+        border-bottom: none;
+    }
+
+    .subtask-checkbox {
+        margin-right: 12px;
+    }
+
+    .subtask-name {
+        flex: 1;
+    }
+
+    .subtask-completed {
+        text-decoration: line-through;
+        color: rgba(0, 0, 0, 0.6);
+    }
+
     .detail-card {
         margin-bottom: 16px;
     }
@@ -218,6 +287,59 @@
                     </div>
                 </div>
             </div>
+
+            {# Subtasks Card with Progress Indicator #}
+            <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
+                <div class="mdc-card mdc-card--outlined detail-card">
+                    <div class="mdc-card__content">
+                        <h2 class="mdc-typography--headline6" style="margin-bottom: 8px">
+                            Subtasks
+                        </h2>
+
+                        {% if subtasks %}
+                            {# Progress Indicator #}
+                            <div class="md3-circular-progress">
+                                <div class="md3-circular-progress__determinate-container">
+                                    <svg class="md3-circular-progress__determinate-circle-container" viewBox="0 0 100 100">
+                                        <circle class="md3-circular-progress__determinate-track"
+                                                cx="50" cy="50" r="45" />
+                                        <circle class="md3-circular-progress__determinate-circle"
+                                                cx="50" cy="50" r="45"
+                                                stroke-dasharray="283"
+                                                stroke-dashoffset="{{ 283|add:'-'|add:assignment.get_completion_percentage|add:'*0.01*283'|floatformat:0 }}" />
+                                    </svg>
+                                </div>
+                                <div class="md3-circular-progress__label">{{ assignment.get_completion_percentage }}%</div>
+                            </div>
+
+                            <div class="subtasks-container">
+                                {% for subtask in subtasks %}
+                                <div class="subtask-item">
+                                    <div class="mdc-checkbox subtask-checkbox">
+                                        <input type="checkbox" class="mdc-checkbox__native-control"
+                                               id="subtask-{{ subtask.id }}"
+                                               {% if subtask.is_completed %}checked{% endif %}
+                                               data-subtask-id="{{ subtask.id }}"
+                                               {% if not user.is_staff and user not in assignment.assignees.all %}disabled{% endif %}>
+                                        <div class="mdc-checkbox__background">
+                                            <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                                <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+                                            </svg>
+                                            <div class="mdc-checkbox__mixedmark"></div>
+                                        </div>
+                                    </div>
+                                    <label for="subtask-{{ subtask.id }}" class="subtask-name {% if subtask.is_completed %}subtask-completed{% endif %}">
+                                        {{ subtask.name }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="mdc-typography--body2">No subtasks for this assignment.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
         {# End Grid Inner #}
     </div>
@@ -291,10 +413,120 @@
 {% block extra_scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize progress indicator on page load
+        const progressCircle = document.querySelector('.md3-circular-progress__determinate-circle');
+        const completionPercentage = {{ assignment.get_completion_percentage }};
+
+        if (progressCircle) {
+            const circumference = 283;
+            const dashoffset = circumference - (completionPercentage / 100 * circumference);
+            progressCircle.setAttribute('stroke-dashoffset', dashoffset.toFixed(0));
+        }
         // Initialize any interactive list items if needed
         document.querySelectorAll(".mdc-list-item[tabindex='0']").forEach((listItem) => {
             mdc.ripple.MDCRipple.attachTo(listItem);
         });
+
+        // Initialize checkboxes
+        document.querySelectorAll('.mdc-checkbox').forEach((checkbox) => {
+            mdc.checkbox.MDCCheckbox.attachTo(checkbox);
+        });
+
+        // Handle subtask checkbox changes
+        document.querySelectorAll('.subtask-checkbox input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const subtaskId = this.getAttribute('data-subtask-id');
+                const isCompleted = this.checked;
+                const label = document.querySelector(`label[for="subtask-${subtaskId}"]`);
+
+                // Update label styling
+                if (isCompleted) {
+                    label.classList.add('subtask-completed');
+                } else {
+                    label.classList.remove('subtask-completed');
+                }
+
+                // Send AJAX request to update subtask status
+                fetch(`/api/subtask/${subtaskId}/update/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        is_completed: isCompleted
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Update progress indicator
+                    const progressLabel = document.querySelector('.md3-circular-progress__label');
+                    const progressCircle = document.querySelector('.md3-circular-progress__determinate-circle');
+
+                    if (progressLabel && progressCircle && data.completion_percentage !== undefined) {
+                        // Update the percentage text
+                        progressLabel.textContent = `${data.completion_percentage}%`;
+
+                        // Calculate new stroke-dashoffset (283 is the circumference of the circle with r=45)
+                        const circumference = 283;
+                        const dashoffset = circumference - (data.completion_percentage / 100 * circumference);
+
+                        // Apply the new dashoffset with a small animation
+                        progressCircle.style.transition = 'stroke-dashoffset 0.3s ease-in-out';
+                        progressCircle.setAttribute('stroke-dashoffset', dashoffset.toFixed(0));
+
+                        // Update the assignment status if provided
+                        if (data.assignment_status) {
+                            const statusChip = document.querySelector('.status-chip');
+                            if (statusChip) {
+                                // Remove old status classes
+                                statusChip.classList.remove('status-not-started', 'status-in-progress', 'status-completed');
+                                // Add new status class
+                                statusChip.classList.add(`status-${data.assignment_status.toLowerCase().replace(' ', '-')}`);
+                                // Update text
+                                statusChip.textContent = data.assignment_status;
+                            }
+                        }
+
+                        // Also update the URL to refresh the page state without reloading
+                        const currentUrl = new URL(window.location.href);
+                        currentUrl.searchParams.set('refresh', Date.now());
+                        window.history.replaceState({}, '', currentUrl);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating subtask:', error);
+                    // Revert checkbox state on error
+                    this.checked = !isCompleted;
+                    if (!isCompleted) {
+                        label.classList.add('subtask-completed');
+                    } else {
+                        label.classList.remove('subtask-completed');
+                    }
+                });
+            });
+        });
+
+        // Helper function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
     });
 </script>
 {% endblock %}

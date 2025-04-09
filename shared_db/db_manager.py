@@ -34,7 +34,7 @@ class DatabaseManager:
     def create_tables(self):
         try:
             cursor = self.conn.cursor()
-            
+
             # Create auth_user table if it doesn't exist (matches Django's auth_user table)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS auth_user (
@@ -79,6 +79,19 @@ class DatabaseManager:
                 )
             """)
 
+            # Create tasks_subtask table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS tasks_subtask (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name VARCHAR(200) NOT NULL,
+                    is_completed BOOLEAN NOT NULL DEFAULT 0,
+                    assignment_id INTEGER NOT NULL,
+                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (assignment_id) REFERENCES tasks_assignment(id) ON DELETE CASCADE
+                )
+            """)
+
             self.conn.commit()
 
         except Exception as e:
@@ -89,15 +102,15 @@ class DatabaseManager:
         try:
             # Generate Django-compatible password hash
             password_hash = make_password(password)
-            
+
             # Current timestamp for date_joined
             now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            
+
             cursor = self.conn.cursor()
             cursor.execute(
                 """
                 INSERT INTO auth_user (
-                    username, password, is_staff, is_superuser, 
+                    username, password, is_staff, is_superuser,
                     is_active, first_name, last_name, email, date_joined
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -118,27 +131,27 @@ class DatabaseManager:
                 (username,)
             )
             result = cursor.fetchone()
-            
+
             if not result:
                 return None
-                
+
             user_id = result['id']
             password_hash = result['password']
             is_staff = result['is_staff']
-            
+
             # Use Django's password verification
             if check_password(password, password_hash):
                 return {
                     'user_id': user_id,
                     'is_staff': is_staff
                 }
-            
+
             return None
         except Exception as e:
             print(f"Error verifying user: {e}")
             raise
 
-    def create_assignment(self, name, due_date, description, status, creator_id, assignee_ids):
+    def create_assignment(self, name, due_date, description, status, creator_id, assignee_ids, subtasks=None):
         try:
             cursor = self.conn.cursor()
             # Insert assignment
@@ -157,7 +170,18 @@ class DatabaseManager:
                     "INSERT INTO tasks_assignment_assignees (assignment_id, user_id) VALUES (?, ?)",
                     (assignment_id, user_id)
                 )
-            
+
+            # Insert subtasks if provided
+            if subtasks:
+                for subtask in subtasks:
+                    cursor.execute(
+                        """
+                        INSERT INTO tasks_subtask (name, is_completed, assignment_id)
+                        VALUES (?, ?, ?)
+                        """,
+                        (subtask['name'], subtask.get('is_completed', False), assignment_id)
+                    )
+
             self.conn.commit()
             return assignment_id
         except Exception as e:
@@ -262,8 +286,88 @@ class DatabaseManager:
         except Exception as e:
             print(f"Error promoting user: {e}")
             self.conn.rollback()
-            raise
+
+    def get_subtasks(self, assignment_id):
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                """
+                SELECT id, name, is_completed, created_at, updated_at
+                FROM tasks_subtask
+                WHERE assignment_id = ?
+                ORDER BY created_at
+                """,
+                (assignment_id,)
+            )
+            return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            print(f"Error getting subtasks: {e}")
+            return []
+
+    def update_subtask(self, subtask_id, is_completed):
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                """
+                UPDATE tasks_subtask
+                SET is_completed = ?, updated_at = datetime('now')
+                WHERE id = ?
+                """,
+                (is_completed, subtask_id)
+            )
+
+            # Get the assignment_id for this subtask
+            cursor.execute(
+                "SELECT assignment_id FROM tasks_subtask WHERE id = ?",
+                (subtask_id,)
+            )
+            result = cursor.fetchone()
+            assignment_id = result['assignment_id'] if result else None
+
+            self.conn.commit()
+
+            # Return the assignment_id so we can calculate completion percentage
+            return assignment_id
+        except Exception as e:
+            print(f"Error updating subtask: {e}")
+            self.conn.rollback()
+            return None
+
+    def get_completion_percentage(self, assignment_id):
+        try:
+            cursor = self.conn.cursor()
+
+            # Get all subtasks for this assignment
+            cursor.execute(
+                "SELECT is_completed FROM tasks_subtask WHERE assignment_id = ?",
+                (assignment_id,)
+            )
+            subtasks = cursor.fetchall()
+
+            if subtasks:
+                total = len(subtasks)
+                completed = sum(1 for s in subtasks if s['is_completed'])
+                return int((completed / total) * 100) if total > 0 else 0
+            else:
+                # If no subtasks, base on assignment status
+                cursor.execute(
+                    "SELECT status FROM tasks_assignment WHERE id = ?",
+                    (assignment_id,)
+                )
+                result = cursor.fetchone()
+                if result:
+                    status = result['status']
+                    if status == 'Completed':
+                        return 100
+                    elif status == 'In Progress':
+                        return 50
+                    else:
+                        return 0
+                return 0
+        except Exception as e:
+            print(f"Error calculating completion percentage: {e}")
+            return 0
 
     def close(self):
         if self.conn:
-            self.conn.close() 
+            self.conn.close()

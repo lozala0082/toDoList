@@ -49,6 +49,95 @@
         margin-bottom: 8px;
     }
 
+    /* Advanced mode toggle styling */
+    .advanced-mode-toggle {
+        display: flex;
+        align-items: center;
+        margin-bottom: 16px;
+        padding: 8px 16px;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+    }
+
+    .advanced-mode-toggle .mdc-switch {
+        margin-right: 16px;
+    }
+
+    /* Subtasks section styling */
+    .subtasks-section {
+        margin-top: 24px;
+        padding: 16px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .subtasks-section h3 {
+        margin-top: 0;
+        margin-bottom: 16px;
+        font-size: 1.1rem;
+    }
+
+    .subtask-form {
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .subtask-form .mdc-text-field {
+        flex: 1;
+        min-width: 250px;
+        margin-right: 16px;
+        margin-bottom: 8px;
+    }
+
+    .subtask-actions {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    /* Material Design 3 Circular Progress */
+    .md3-circular-progress {
+        position: relative;
+        width: 48px;
+        height: 48px;
+    }
+
+    .md3-circular-progress__determinate-container,
+    .md3-circular-progress__indeterminate-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    .md3-circular-progress__determinate-circle,
+    .md3-circular-progress__indeterminate-circle {
+        fill: transparent;
+        stroke-width: 4px;
+        stroke-linecap: round;
+    }
+
+    .md3-circular-progress__determinate-circle {
+        stroke: var(--mdc-theme-primary);
+        transition: stroke-dashoffset 0.5s;
+    }
+
+    .md3-circular-progress__determinate-track {
+        stroke: #e0e0e0;
+    }
+
+    .md3-circular-progress__label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 12px;
+        font-weight: 500;
+    }
+
     /* Custom checkbox styling */
     .custom-checkbox-container {
         display: flex;
@@ -264,6 +353,94 @@
                 {% endwith %}
             </div>
 
+            {# Advanced Mode Toggle #}
+            <div class="advanced-mode-toggle">
+                <div class="mdc-form-field">
+                    <div class="mdc-checkbox">
+                        <input type="checkbox"
+                               id="advanced-mode-switch"
+                               class="mdc-checkbox__native-control"
+                               name="{{ form.advanced_mode.name }}"
+                               {% if form.advanced_mode.value %}checked{% endif %}>
+                        <div class="mdc-checkbox__background">
+                            <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+                            </svg>
+                            <div class="mdc-checkbox__mixedmark"></div>
+                        </div>
+                    </div>
+                    <label for="advanced-mode-switch" class="mdc-typography--body1">{{ form.advanced_mode.label }}</label>
+                </div>
+                {% if form.advanced_mode.help_text %}
+                <div class="mdc-typography--caption" style="margin-left: 40px;">{{ form.advanced_mode.help_text }}</div>
+                {% endif %}
+            </div>
+
+            {# Subtasks Section - Initially hidden, shown when advanced mode is enabled #}
+            <div id="subtasks-section" class="subtasks-section" style="display: {% if form.advanced_mode.value %}block{% else %}none{% endif %};">
+                <h3 class="mdc-typography--subtitle1">Subtasks</h3>
+                <p class="mdc-typography--body2">Break down your assignment into smaller tasks</p>
+
+                {{ subtask_formset.management_form }}
+
+                <div id="subtask-forms-container">
+                    {% for subtask_form in subtask_formset.forms %}
+                    <div class="subtask-form" data-form-index="{{ forloop.counter0 }}">
+                        {% for hidden_field in subtask_form.hidden_fields %}{{ hidden_field }}{% endfor %}
+
+                        <div class="mdc-text-field mdc-text-field--outlined">
+                            <span class="mdc-notched-outline">
+                                <span class="mdc-notched-outline__leading"></span>
+                                <span class="mdc-notched-outline__notch">
+                                    <span class="mdc-floating-label">Subtask Name</span>
+                                </span>
+                                <span class="mdc-notched-outline__trailing"></span>
+                            </span>
+                            <input class="mdc-text-field__input" type="text"
+                                   name="{{ subtask_formset.prefix }}-{{ forloop.counter0 }}-name"
+                                   id="id_{{ subtask_formset.prefix }}-{{ forloop.counter0 }}-name"
+                                   value="{{ subtask_form.name.value|default:'' }}">
+                        </div>
+
+                        <div class="subtask-actions">
+                            {% if form.instance.pk %}
+                            <div class="mdc-form-field">
+                                <div class="mdc-checkbox">
+                                    <input type="checkbox" class="mdc-checkbox__native-control"
+                                           name="{{ subtask_formset.prefix }}-{{ forloop.counter0 }}-is_completed"
+                                           id="id_{{ subtask_formset.prefix }}-{{ forloop.counter0 }}-is_completed"
+                                           {% if subtask_form.is_completed.value %}checked{% endif %}>
+                                    <div class="mdc-checkbox__background">
+                                        <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                                            <path class="mdc-checkbox__checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"/>
+                                        </svg>
+                                        <div class="mdc-checkbox__mixedmark"></div>
+                                    </div>
+                                </div>
+                                <label for="id_{{ subtask_formset.prefix }}-{{ forloop.counter0 }}-is_completed">Completed</label>
+                            </div>
+                            {% else %}
+                            {# Hidden field for is_completed when creating a new assignment #}
+                            <input type="hidden" name="{{ subtask_formset.prefix }}-{{ forloop.counter0 }}-is_completed"
+                                   id="id_{{ subtask_formset.prefix }}-{{ forloop.counter0 }}-is_completed" value="">
+                            {% endif %}
+
+                            <button type="button" class="mdc-icon-button material-symbols-outlined remove-subtask-btn"
+                                    aria-label="Remove subtask">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button type="button" id="add-subtask-btn" class="mdc-button mdc-button--raised" style="margin-top: 16px;">
+                    <span class="mdc-button__ripple"></span>
+                    <span class="material-symbols-outlined mdc-button__icon">add</span>
+                    <span class="mdc-button__label">Add Subtask</span>
+                </button>
+            </div>
+
             {# Action Buttons #}
             <div class="button-container">
                 <a
@@ -293,8 +470,188 @@
             mdc.textField.MDCTextField.attachTo(tf);
         });
 
+        // No longer using MDC switches, using checkboxes instead
+
+        // Initialize checkboxes
+        document.querySelectorAll('.mdc-checkbox').forEach((checkbox) => {
+            mdc.checkbox.MDCCheckbox.attachTo(checkbox);
+        });
+
         // Our custom checkboxes work with native HTML functionality
         // The label's 'for' attribute handles the toggling automatically
+
+        // Advanced mode toggle functionality
+        const advancedModeSwitch = document.getElementById('advanced-mode-switch');
+        const subtasksSection = document.getElementById('subtasks-section');
+        const statusField = document.getElementById('id_status');
+        const statusFieldContainer = statusField ? statusField.closest('.form-field-container') : null;
+
+        advancedModeSwitch.addEventListener('change', function() {
+            subtasksSection.style.display = this.checked ? 'block' : 'none';
+
+            // If advanced mode is enabled, disable the status field
+            if (statusField && statusFieldContainer) {
+                if (this.checked) {
+                    statusField.disabled = true;
+                    statusField.parentElement.classList.add('mdc-text-field--disabled');
+
+                    // Add help text explaining why it's disabled
+                    let helpText = document.createElement('p');
+                    helpText.className = 'status-help-text';
+                    helpText.style.fontSize = '0.75rem';
+                    helpText.style.color = 'rgba(0,0,0,0.6)';
+                    helpText.style.marginTop = '4px';
+                    helpText.textContent = 'Status is automatically determined by subtask completion';
+
+                    // Only add if it doesn't exist yet
+                    if (!statusFieldContainer.querySelector('.status-help-text')) {
+                        statusFieldContainer.appendChild(helpText);
+                    }
+                } else {
+                    statusField.disabled = false;
+                    statusField.parentElement.classList.remove('mdc-text-field--disabled');
+
+                    // Remove the help text
+                    const helpText = statusFieldContainer.querySelector('.status-help-text');
+                    if (helpText) {
+                        helpText.remove();
+                    }
+                }
+            }
+        });
+
+        // Trigger the change event to initialize the state
+        if (advancedModeSwitch.checked) {
+            advancedModeSwitch.dispatchEvent(new Event('change'));
+        }
+
+        // Add subtask button functionality
+        const addSubtaskBtn = document.getElementById('add-subtask-btn');
+        const subtaskFormsContainer = document.getElementById('subtask-forms-container');
+        const formPrefix = '{{ subtask_formset.prefix }}';
+
+        // Get the current form count and max forms from the management form
+        let formCount = parseInt(document.getElementById('id_' + formPrefix + '-TOTAL_FORMS').value);
+        const maxForms = parseInt(document.getElementById('id_' + formPrefix + '-MAX_NUM_FORMS').value || '1000');
+
+        addSubtaskBtn.addEventListener('click', function() {
+            if (formCount >= maxForms) {
+                alert('Maximum number of subtasks reached');
+                return;
+            }
+
+            // Clone the first form as a template
+            const formTemplate = subtaskFormsContainer.querySelector('.subtask-form').cloneNode(true);
+
+            // Update form index
+            formTemplate.setAttribute('data-form-index', formCount);
+
+            // Check if we're creating a new assignment or editing an existing one
+            const isNewAssignment = !{{ form.instance.pk|default:0 }};
+
+            // If this is a new assignment, ensure the completed checkbox is hidden
+            if (isNewAssignment) {
+                // Find and remove the checkbox field if it exists
+                const checkboxField = formTemplate.querySelector('.mdc-form-field');
+                if (checkboxField) {
+                    checkboxField.remove();
+                }
+
+                // Make sure we have a hidden field for is_completed
+                let hiddenField = formTemplate.querySelector(`input[name$="-is_completed"]`);
+                if (!hiddenField) {
+                    hiddenField = document.createElement('input');
+                    hiddenField.type = 'hidden';
+                    hiddenField.name = `${formPrefix}-${formCount}-is_completed`;
+                    hiddenField.id = `id_${formPrefix}-${formCount}-is_completed`;
+                    hiddenField.value = '';
+                    formTemplate.querySelector('.subtask-actions').appendChild(hiddenField);
+                }
+            }
+
+            // Update IDs and names
+            formTemplate.querySelectorAll('input, label').forEach(el => {
+                if (el.id) el.id = el.id.replace(/-\d+-/, '-' + formCount + '-');
+                if (el.name) el.name = el.name.replace(/-\d+-/, '-' + formCount + '-');
+                if (el.getAttribute('for')) el.setAttribute('for', el.getAttribute('for').replace(/-\d+-/, '-' + formCount + '-'));
+
+                // Clear values for new form
+                if (el.type === 'text') el.value = '';
+                if (el.type === 'checkbox') el.checked = false;
+            });
+
+            // Add the new form to the container
+            subtaskFormsContainer.appendChild(formTemplate);
+
+            // Initialize MDC components in the new form
+            const newTextField = formTemplate.querySelector('.mdc-text-field');
+            if (newTextField) mdc.textField.MDCTextField.attachTo(newTextField);
+
+            const newCheckbox = formTemplate.querySelector('.mdc-checkbox');
+            if (newCheckbox) mdc.checkbox.MDCCheckbox.attachTo(newCheckbox);
+
+            // Update form count
+            formCount++;
+            document.getElementById('id_' + formPrefix + '-TOTAL_FORMS').value = formCount;
+
+            // Add event listener to the remove button
+            const removeBtn = formTemplate.querySelector('.remove-subtask-btn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function() {
+                    removeSubtask(formTemplate);
+                });
+            }
+        });
+
+        // Remove subtask functionality
+        function removeSubtask(formElement) {
+            // Add DELETE field if the form is for an existing subtask
+            const formIndex = formElement.getAttribute('data-form-index');
+            const idField = document.querySelector(`#id_${formPrefix}-${formIndex}-id`);
+
+            if (idField && idField.value) {
+                // This is an existing subtask, mark it for deletion
+                const deleteField = document.createElement('input');
+                deleteField.type = 'hidden';
+                deleteField.name = `${formPrefix}-${formIndex}-DELETE`;
+                deleteField.value = 'on';
+                formElement.appendChild(deleteField);
+                formElement.style.display = 'none';
+            } else {
+                // This is a new subtask, just remove it from the DOM
+                formElement.remove();
+
+                // Update form indices for all subsequent forms
+                const forms = subtaskFormsContainer.querySelectorAll('.subtask-form');
+                let newCount = 0;
+
+                forms.forEach((form, index) => {
+                    if (form.style.display !== 'none') {
+                        form.setAttribute('data-form-index', newCount);
+
+                        form.querySelectorAll('input, label').forEach(el => {
+                            if (el.id) el.id = el.id.replace(/-\d+-/, '-' + newCount + '-');
+                            if (el.name) el.name = el.name.replace(/-\d+-/, '-' + newCount + '-');
+                            if (el.getAttribute('for')) el.setAttribute('for', el.getAttribute('for').replace(/-\d+-/, '-' + newCount + '-'));
+                        });
+
+                        newCount++;
+                    }
+                });
+
+                // Update form count
+                formCount = newCount;
+                document.getElementById('id_' + formPrefix + '-TOTAL_FORMS').value = formCount;
+            }
+        }
+
+        // Add event listeners to existing remove buttons
+        document.querySelectorAll('.remove-subtask-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const formElement = this.closest('.subtask-form');
+                removeSubtask(formElement);
+            });
+        });
     });
 </script>
 {% endblock %}

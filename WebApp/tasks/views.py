@@ -6,8 +6,10 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.urls import reverse_lazy
 from django.utils import timezone
 from datetime import timedelta
-from .models import Assignment
-from .forms import AssignmentForm, AssignmentStatusForm, UserRegistrationForm
+from django.http import JsonResponse
+import json
+from .models import Assignment, SubTask
+from .forms import AssignmentForm, AssignmentStatusForm, UserRegistrationForm, SubTaskFormSet, NewSubTaskFormSet
 
 def is_admin(user):
     return user.is_staff
@@ -63,6 +65,30 @@ class HomeView(LoginRequiredMixin, ListView):
             due_date__gt=month_end
         ).exclude(id__in=all_current_ids).order_by('due_date')
 
+        # Calculate statistics for progress indicators by status
+        all_assignments = base_queryset.all()
+        total_assignments = all_assignments.count()
+
+        # Count assignments by status
+        completed_assignments = all_assignments.filter(status='Completed').count()
+        in_progress_assignments = all_assignments.filter(status='In Progress').count()
+        not_started_assignments = all_assignments.filter(status='Not Started').count()
+
+        # Add counts to context
+        context['total_assignments'] = total_assignments
+        context['completed_assignments'] = completed_assignments
+        context['in_progress_assignments'] = in_progress_assignments
+        context['not_started_assignments'] = not_started_assignments
+
+        # Calculate completion percentage
+        if total_assignments > 0:
+            context['completion_percentage'] = int((completed_assignments / total_assignments) * 100)
+        else:
+            context['completion_percentage'] = 0
+
+        # Force refresh of the context data to ensure it's up-to-date
+        context['refresh_timestamp'] = timezone.now().timestamp()
+
         return context
 
 class AssignmentDetailView(LoginRequiredMixin, DetailView):
@@ -75,14 +101,58 @@ class AssignmentDetailView(LoginRequiredMixin, DetailView):
             return Assignment.objects.all()
         return Assignment.objects.filter(assignees=self.request.user)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add subtasks to context
+        context['subtasks'] = self.object.subtasks.all().order_by('created_at')
+        return context
+
 class AssignmentCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Assignment
     form_class = AssignmentForm
     template_name = 'tasks/assignment_form.html'
     success_url = reverse_lazy('home')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['subtask_formset'] = NewSubTaskFormSet(self.request.POST, prefix='subtasks')
+        else:
+            context['subtask_formset'] = NewSubTaskFormSet(prefix='subtasks')
+        return context
+
     def form_valid(self, form):
+        context = self.get_context_data()
+        subtask_formset = context['subtask_formset']
+
+        # Set the creator
         form.instance.creator = self.request.user
+
+        # Check if advanced mode is enabled
+        if form.cleaned_data.get('advanced_mode'):
+            if subtask_formset.is_valid():
+                # Attach the formset to the form for saving in form.save()
+                form.subtask_formset = subtask_formset
+
+                # For advanced mode, status will be determined by subtasks
+                # We'll set it initially based on whether any subtasks are marked completed
+                has_completed = False
+                has_subtasks = False
+
+                for subtask_form in subtask_formset:
+                    if subtask_form.cleaned_data and not subtask_form.cleaned_data.get('DELETE', False):
+                        has_subtasks = True
+                        if subtask_form.cleaned_data.get('is_completed', False):
+                            has_completed = True
+
+                if has_subtasks:
+                    if has_completed:
+                        form.instance.status = 'In Progress'
+                    else:
+                        form.instance.status = 'Not Started'
+            else:
+                return self.form_invalid(form)
+
         return super().form_valid(form)
 
     def test_func(self):
@@ -93,6 +163,36 @@ class AssignmentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = AssignmentForm
     template_name = 'tasks/assignment_form.html'
     success_url = reverse_lazy('home')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['subtask_formset'] = SubTaskFormSet(self.request.POST, prefix='subtasks')
+        else:
+            # Pre-populate with existing subtasks
+            subtask_data = [
+                {'name': subtask.name, 'is_completed': subtask.is_completed}
+                for subtask in self.object.subtasks.all()
+            ]
+            context['subtask_formset'] = SubTaskFormSet(
+                initial=subtask_data,
+                prefix='subtasks'
+            )
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        subtask_formset = context['subtask_formset']
+
+        # Check if advanced mode is enabled
+        if form.cleaned_data.get('advanced_mode'):
+            if subtask_formset.is_valid():
+                # Attach the formset to the form for saving in form.save()
+                form.subtask_formset = subtask_formset
+            else:
+                return self.form_invalid(form)
+
+        return super().form_valid(form)
 
     def test_func(self):
         return self.request.user.is_staff
@@ -145,3 +245,37 @@ def register_view(request):
         form = UserRegistrationForm()
 
     return render(request, 'tasks/register_form.html', {'form': form})
+
+@login_required
+def update_subtask(request, pk):
+    """API endpoint to update a subtask's completion status"""
+    subtask = get_object_or_404(SubTask, pk=pk)
+    assignment = subtask.assignment
+
+    # Check if user is authorized (either staff or assignee)
+    if not (request.user.is_staff or assignment.assignees.filter(id=request.user.id).exists()):
+        return JsonResponse({'error': 'Not authorized'}, status=403)
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            is_completed = data.get('is_completed', False)
+
+            # Update the subtask
+            subtask.is_completed = is_completed
+            subtask.save()
+
+            # Get the updated assignment after status change
+            assignment.refresh_from_db()
+
+            # Return updated completion percentage and status
+            return JsonResponse({
+                'success': True,
+                'is_completed': subtask.is_completed,
+                'completion_percentage': assignment.get_completion_percentage(),
+                'assignment_status': assignment.status
+            })
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)

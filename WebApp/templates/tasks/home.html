@@ -20,7 +20,108 @@
         padding-top: 8px;
     }
 
+    /* Dashboard stats section */
+    .dashboard-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+    }
 
+    .stat-card {
+        background-color: var(--mdc-theme-surface);
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        text-align: center;
+        min-width: 120px;
+        margin: 8px;
+        flex: 1;
+    }
+
+    /* Material Design 3 Circular Progress */
+    .md3-circular-progress {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 16px;
+    }
+
+    .md3-circular-progress__determinate-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    .md3-circular-progress__determinate-circle {
+        fill: transparent;
+        stroke-width: 8px;
+        stroke-linecap: round;
+        transform: rotate(-90deg);
+        transform-origin: center;
+        transition: stroke-dashoffset 0.5s;
+    }
+
+    .md3-circular-progress__determinate-track {
+        fill: transparent;
+        stroke: #e0e0e0;
+        stroke-width: 8px;
+    }
+
+    .md3-circular-progress__label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .progress-legend {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 8px;
+        font-size: 14px;
+    }
+
+    .progress-legend-item {
+        display: flex;
+        align-items: center;
+        margin: 0 8px;
+    }
+
+    .progress-legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 4px;
+    }
+
+    .progress-completed {
+        stroke: #4CAF50; /* Green */
+    }
+
+    .progress-in-progress {
+        stroke: #2196F3; /* Blue */
+    }
+
+    .progress-not-started {
+        stroke: #F44336; /* Red */
+    }
+
+    .legend-completed {
+        background-color: #4CAF50;
+    }
+
+    .legend-in-progress {
+        background-color: #2196F3;
+    }
+
+    .legend-not-started {
+        background-color: #F44336;
+    }
 
     /* Assignment sections layout */
     .assignment-sections {
@@ -105,6 +206,44 @@
         Welcome back, {{ user.username }}!
     </h2>
     {% include "tasks/partials/cat_mascot.html" with image_name="lockedincat.png" alt_text="Locked In Cat" cat_type="lockedin" %}
+
+    {# Task Status Section with Circular Progress Indicator #}
+    <div class="mdc-card" style="margin-bottom: 24px; padding: 16px;">
+        <h2 class="mdc-typography--headline6" style="margin-bottom: 16px; display: flex; align-items: center;">
+            <span class="material-symbols-outlined" style="margin-right: 8px;">assignment</span>
+            Task Status
+        </h2>
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="md3-circular-progress">
+                    <div class="md3-circular-progress__determinate-container">
+                        <svg class="md3-circular-progress__determinate-circle-container" viewBox="0 0 100 100">
+                            <circle class="md3-circular-progress__determinate-track"
+                                    cx="50" cy="50" r="45" />
+                            <circle class="md3-circular-progress__determinate-circle progress-completed"
+                                    cx="50" cy="50" r="45"
+                                    stroke-dasharray="283"
+                                    stroke-dashoffset="{{ 283|add:'-'|add:completion_percentage|add:'*0.01*283'|floatformat:0 }}" />
+                        </svg>
+                    </div>
+                    <div class="md3-circular-progress__label">{{ completion_percentage }}%</div>
+                </div>
+                <h3 class="mdc-typography--subtitle1">Overall Progress</h3>
+                <p class="mdc-typography--body2">{{ completed_assignments }} of {{ total_assignments }} completed</p>
+
+
+            </div>
+
+            {% if today_assignments %}
+            <div class="stat-card">
+                <h3 class="mdc-typography--subtitle1">Due Today</h3>
+                <p class="mdc-typography--headline5">{{ today_assignments.count }}</p>
+                <p class="mdc-typography--body2">Tasks requiring attention</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 
     {# Assignment Sections Container #}
     <div class="assignment-sections">
@@ -245,6 +384,16 @@
 {% block extra_scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize progress indicator on page load
+        const progressCircle = document.querySelector('.md3-circular-progress__determinate-circle');
+        const completionPercentage = {{ completion_percentage }};
+
+        if (progressCircle) {
+            const circumference = 283;
+            const dashoffset = circumference - (completionPercentage / 100 * circumference);
+            progressCircle.setAttribute('stroke-dashoffset', dashoffset.toFixed(0));
+        }
+
         // Ensure ripples are attached to list items
         document.querySelectorAll(".mdc-list-item").forEach((listItem) => {
             if (listItem) mdc.ripple.MDCRipple.attachTo(listItem);

@@ -9,4 +9,7 @@ urlpatterns = [
     path('assignment/<int:pk>/delete/', views.AssignmentDeleteView.as_view(), name='assignment-delete'),
     path('assignment/<int:pk>/status/', views.update_status, name='update-status'),
     path('register/', views.register_view, name='register'),
+
+    # API endpoints
+    path('api/subtask/<int:pk>/update/', views.update_subtask, name='update-subtask'),
 ]

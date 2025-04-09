@@ -6,7 +6,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Create missing tables but skip tables that already exist
-        
+
         with connection.cursor() as cursor:
             # Check if django_session table exists
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='django_session';")
@@ -20,7 +20,7 @@ class Command(BaseCommand):
                     )
                 ''')
                 cursor.execute('CREATE INDEX django_session_expire_date ON django_session (expire_date)')
-            
+
             # Check if django_admin_log table exists
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='django_admin_log';")
             if not cursor.fetchone():
@@ -37,7 +37,7 @@ class Command(BaseCommand):
                         user_id integer NOT NULL REFERENCES auth_user (id)
                     )
                 ''')
-            
+
             # Check if django_content_type table exists
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='django_content_type';")
             if not cursor.fetchone():
@@ -50,10 +50,10 @@ class Command(BaseCommand):
                         UNIQUE (app_label, model)
                     )
                 ''')
-            
+
             # Create django_migrations table if it doesn't exist
             cursor.execute("CREATE TABLE IF NOT EXISTS django_migrations (id INTEGER PRIMARY KEY AUTOINCREMENT, app VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, applied DATETIME NOT NULL)")
-            
+
             # Insert migration records for all apps
             migrations = [
                 ('contenttypes', '0001_initial'),
@@ -75,8 +75,9 @@ class Command(BaseCommand):
                 ('admin', '0003_logentry_add_action_flag_choices'),
                 ('sessions', '0001_initial'),
                 ('tasks', '0001_initial'),
+                ('tasks', '0002_subtask'),
             ]
-            
+
             for app, name in migrations:
                 # Check if migration is already recorded
                 cursor.execute("SELECT id FROM django_migrations WHERE app = %s AND name = %s", [app, name])
@@ -86,5 +87,5 @@ class Command(BaseCommand):
                         [app, name]
                     )
                     self.stdout.write(f"Marked migration {app}.{name} as applied")
-            
-        self.stdout.write(self.style.SUCCESS('Database synchronized successfully!')) 
+
+        self.stdout.write(self.style.SUCCESS('Database synchronized successfully!'))
