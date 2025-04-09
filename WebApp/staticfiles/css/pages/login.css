@@ -1,0 +1,127 @@
+/**
+ * Task Manager - Login Page Styles
+ * Specific styles for the login and registration pages
+ */
+
+/* Login container */
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 64px);
+    padding: var(--spacing-md);
+}
+
+/* Login card */
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.login-card h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    color: var(--mdc-theme-primary);
+}
+
+/* Form fields in login */
+.login-card .form-field-container {
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Login buttons */
+.login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+.login-buttons .mdc-button {
+    width: 100%;
+}
+
+/* Register link */
+.register-link {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+    font-size: var(--font-size-sm);
+}
+
+.register-link a {
+    color: var(--mdc-theme-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+
+/* Cat mascot on login page */
+.login-container .cat-mascot {
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Registration form */
+.registration-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 64px);
+    padding: var(--spacing-md);
+}
+
+.registration-card {
+    width: 100%;
+    max-width: 500px;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.registration-card h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    color: var(--mdc-theme-primary);
+}
+
+/* Password requirements */
+.password-requirements {
+    margin-top: var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* Login link on registration page */
+.login-link {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+    font-size: var(--font-size-sm);
+}
+
+.login-link a {
+    color: var(--mdc-theme-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .login-card,
+    .registration-card {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+    
+    .login-container,
+    .registration-container {
+        padding: var(--spacing-sm);
+    }
+}

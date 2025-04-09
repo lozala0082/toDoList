@@ -1,0 +1,161 @@
+/**
+ * Task Manager - Forms Component
+ * Styles for form elements and form layouts
+ */
+
+/* Form container */
+.form-container {
+    display: flex;
+    justify-content: center;
+    padding: var(--spacing-md);
+}
+
+/* Form card */
+.form-card {
+    width: 100%;
+    max-width: 600px;
+    padding: var(--spacing-lg);
+    background-color: var(--mdc-theme-surface);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-1);
+}
+
+.form-card h2 {
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+}
+
+/* Form field container */
+.form-field-container {
+    margin-bottom: var(--form-field-margin-bottom);
+}
+
+/* Material text fields */
+.mdc-text-field {
+    width: 100%;
+}
+
+.mdc-text-field--textarea {
+    height: auto;
+    min-height: 100px;
+}
+
+/* Checkbox list */
+.checkbox-list-label {
+    margin-bottom: var(--spacing-sm);
+    display: block;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: var(--font-size-sm);
+}
+
+/* Custom checkbox styling */
+.custom-checkbox-container {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.custom-checkbox-container:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Hide the default checkbox but keep it accessible */
+.custom-checkbox-container input[type="checkbox"] {
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+/* Custom checkbox appearance */
+.custom-checkbox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    background-color: white;
+    border: 2px solid rgba(0, 0, 0, 0.54);
+    transition: all var(--transition-fast);
+}
+
+/* Checked state */
+.custom-checkbox-container input[type="checkbox"]:checked + .custom-checkbox {
+    background-color: var(--mdc-theme-primary);
+    border-color: var(--mdc-theme-primary);
+}
+
+/* Checkmark */
+.custom-checkbox-checkmark {
+    display: none;
+    color: white;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.custom-checkbox-container input[type="checkbox"]:checked + .custom-checkbox .custom-checkbox-checkmark {
+    display: block;
+}
+
+/* Label styling */
+.custom-checkbox-label {
+    font-size: var(--font-size-md);
+    line-height: 1.5;
+    flex: 1;
+}
+
+/* Button container */
+.button-container {
+    margin-top: var(--spacing-lg);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+}
+
+/* Helper text */
+.mdc-text-field-helper-text {
+    white-space: normal;
+}
+
+/* Form validation */
+.mdc-text-field-helper-text--validation-msg {
+    color: var(--mdc-theme-error);
+}
+
+/* Form sections */
+.form-section {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+/* Form section title */
+.form-section-title {
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-card {
+        padding: var(--spacing-md);
+    }
+    
+    .button-container {
+        flex-direction: column;
+    }
+    
+    .button-container .mdc-button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,244 @@
+/**
+ * Task Manager - Assignment Detail Styles
+ * Specific styles for the assignment detail page
+ */
+
+/* Assignment detail container */
+.assignment-detail-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--spacing-md);
+}
+
+/* Assignment header */
+.assignment-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.assignment-title {
+    margin: 0 0 var(--spacing-sm);
+    font-size: var(--font-size-xl);
+    font-weight: 500;
+    color: var(--mdc-theme-primary);
+}
+
+/* Assignment metadata */
+.assignment-metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.metadata-item {
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.metadata-item__icon {
+    margin-right: var(--spacing-xs);
+    font-size: 18px;
+}
+
+.metadata-item__label {
+    font-weight: 500;
+    margin-right: var(--spacing-xs);
+}
+
+/* Assignment status */
+.assignment-status {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    margin-bottom: var(--spacing-md);
+}
+
+.assignment-status--not-started {
+    background-color: var(--status-not-started-bg);
+    color: var(--status-not-started-color);
+}
+
+.assignment-status--in-progress {
+    background-color: var(--status-in-progress-bg);
+    color: var(--status-in-progress-color);
+}
+
+.assignment-status--completed {
+    background-color: var(--status-completed-bg);
+    color: var(--status-completed-color);
+}
+
+/* Assignment description */
+.assignment-description {
+    margin-bottom: var(--spacing-xl);
+    line-height: 1.6;
+}
+
+.assignment-description h3 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    color: var(--mdc-theme-primary);
+}
+
+/* Subtasks section */
+.subtasks-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.subtasks-section h3 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    color: var(--mdc-theme-primary);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Subtask list */
+.subtask-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.subtask-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    background-color: white;
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-1);
+    transition: background-color var(--transition-fast);
+}
+
+.subtask-item:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.subtask-item__checkbox {
+    margin-right: var(--spacing-md);
+}
+
+.subtask-item__text {
+    flex-grow: 1;
+}
+
+.subtask-item--completed .subtask-item__text {
+    text-decoration: line-through;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* Assignees section */
+.assignees-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.assignees-section h3 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    color: var(--mdc-theme-primary);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Assignee list */
+.assignee-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.assignee-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
+}
+
+.assignee-item__avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--mdc-theme-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+/* Action buttons */
+.assignment-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Status update form */
+.status-update-form {
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: var(--border-radius-sm);
+}
+
+.status-update-form h3 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-md);
+    font-weight: 500;
+}
+
+.status-options {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.status-option {
+    flex: 1;
+    text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .assignment-metadata {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .assignment-actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .assignment-actions .mdc-button {
+        width: 100%;
+    }
+    
+    .status-options {
+        flex-direction: column;
+    }
+}

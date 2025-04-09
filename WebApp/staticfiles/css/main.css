@@ -1,0 +1,33 @@
+/**
+ * Task Manager - Main CSS File
+ * This file imports all component, layout, page, and theme styles
+ */
+
+/* Base styles and variables */
+@import 'themes/variables.css';
+@import 'themes/base.css';
+
+/* Component styles */
+@import 'components/buttons.css';
+@import 'components/cards.css';
+@import 'components/forms.css';
+@import 'components/form-inputs.css';
+@import 'components/form-validation.css';
+@import 'components/cat-mascots.css';
+@import 'components/progress.css';
+@import 'components/snackbar.css';
+@import 'components/lists.css';
+
+/* Layout styles */
+@import 'layouts/header.css';
+@import 'layouts/main-content.css';
+@import 'layouts/responsive.css';
+
+/* Page-specific styles */
+@import 'pages/home.css';
+@import 'pages/login.css';
+@import 'pages/assignment-form.css';
+@import 'pages/assignment-detail.css';
+
+/* Utility classes */
+@import 'utils.css';

@@ -1,0 +1,173 @@
+/**
+ * Task Manager - Progress Component
+ * Styles for progress indicators, both linear and circular
+ */
+
+/* Circular progress indicator */
+.md3-circular-progress {
+    position: relative;
+    width: 48px;
+    height: 48px;
+}
+
+.md3-circular-progress--large {
+    width: 96px;
+    height: 96px;
+}
+
+.md3-circular-progress--small {
+    width: 24px;
+    height: 24px;
+}
+
+.md3-circular-progress__determinate-container,
+.md3-circular-progress__indeterminate-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.md3-circular-progress__determinate-circle,
+.md3-circular-progress__indeterminate-circle {
+    fill: none;
+    stroke: var(--mdc-theme-primary);
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.3s ease;
+}
+
+.md3-circular-progress__determinate-track {
+    fill: none;
+    stroke: #e0e0e0;
+    stroke-width: 4;
+}
+
+.md3-circular-progress__determinate-circle {
+    stroke-dasharray: 283;
+    /* stroke-dashoffset will be set dynamically via JavaScript */
+}
+
+/* Indeterminate animation */
+.md3-circular-progress__indeterminate-circle-clipper {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    clip: rect(0, 48px, 48px, 24px);
+}
+
+.md3-circular-progress__indeterminate-circle {
+    stroke-dasharray: 283;
+    stroke-dashoffset: 141;
+    animation: md3-circular-progress-indeterminate-rotation 1.4s linear infinite;
+}
+
+@keyframes md3-circular-progress-indeterminate-rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Progress label */
+.md3-circular-progress__label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--mdc-theme-on-surface);
+}
+
+/* SVG container */
+.md3-circular-progress__svg-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+/* Linear progress indicator */
+.md3-linear-progress {
+    position: relative;
+    width: 100%;
+    height: 4px;
+    overflow: hidden;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+}
+
+.md3-linear-progress__bar {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-origin: left center;
+    background-color: var(--mdc-theme-primary);
+    transition: transform 0.25s ease;
+}
+
+.md3-linear-progress__bar--determinate {
+    transform: scaleX(0); /* Will be set dynamically via JavaScript */
+}
+
+/* Indeterminate animation for linear progress */
+.md3-linear-progress__bar--indeterminate-primary {
+    animation: md3-linear-progress-primary-indeterminate 2s infinite linear;
+}
+
+.md3-linear-progress__bar--indeterminate-secondary {
+    animation: md3-linear-progress-secondary-indeterminate 2s infinite linear;
+}
+
+@keyframes md3-linear-progress-primary-indeterminate {
+    0% {
+        transform: translateX(-100%) scaleX(0.1);
+    }
+    20% {
+        transform: translateX(-40%) scaleX(0.5);
+    }
+    100% {
+        transform: translateX(100%) scaleX(0.1);
+    }
+}
+
+@keyframes md3-linear-progress-secondary-indeterminate {
+    0% {
+        transform: translateX(-100%) scaleX(0.1);
+    }
+    60% {
+        transform: translateX(20%) scaleX(0.4);
+    }
+    100% {
+        transform: translateX(100%) scaleX(0.1);
+    }
+}
+
+/* Status-specific progress colors */
+.md3-circular-progress--not-started .md3-circular-progress__determinate-circle {
+    stroke: var(--status-not-started-bg);
+}
+
+.md3-circular-progress--in-progress .md3-circular-progress__determinate-circle {
+    stroke: var(--status-in-progress-bg);
+}
+
+.md3-circular-progress--completed .md3-circular-progress__determinate-circle {
+    stroke: var(--status-completed-bg);
+}
+
+.md3-linear-progress--not-started .md3-linear-progress__bar {
+    background-color: var(--status-not-started-bg);
+}
+
+.md3-linear-progress--in-progress .md3-linear-progress__bar {
+    background-color: var(--status-in-progress-bg);
+}
+
+.md3-linear-progress--completed .md3-linear-progress__bar {
+    background-color: var(--status-completed-bg);
+}

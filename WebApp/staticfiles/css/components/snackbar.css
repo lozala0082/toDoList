@@ -1,0 +1,121 @@
+/**
+ * Task Manager - Snackbar Component
+ * Styles for Material Design 3 snackbars (toast notifications)
+ */
+
+/* Snackbar container */
+.mdc-snackbar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 8;
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    pointer-events: none;
+    /* Hidden by default, shown via JavaScript */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 150ms, visibility 0s 150ms;
+}
+
+.mdc-snackbar--open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 150ms, visibility 0s;
+}
+
+/* Snackbar surface */
+.mdc-snackbar__surface {
+    min-width: 344px;
+    max-width: 672px;
+    background-color: #333333;
+    color: white;
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-2);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding: var(--spacing-sm) var(--spacing-md);
+    pointer-events: auto;
+}
+
+/* Snackbar label (message text) */
+.mdc-snackbar__label {
+    flex-grow: 1;
+    padding: var(--spacing-sm) 0;
+    font-size: var(--font-size-sm);
+}
+
+/* Snackbar actions */
+.mdc-snackbar__actions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    margin-left: var(--spacing-sm);
+}
+
+/* Snackbar action button */
+.mdc-snackbar__action {
+    color: #bb86fc; /* Secondary color for dark background */
+    background: none;
+    border: none;
+    padding: var(--spacing-sm);
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.0892857143em;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    outline: none;
+}
+
+.mdc-snackbar__action:hover {
+    opacity: 0.8;
+}
+
+/* Snackbar dismiss button */
+.mdc-snackbar__dismiss {
+    color: rgba(255, 255, 255, 0.6);
+    background: none;
+    border: none;
+    padding: var(--spacing-sm);
+    cursor: pointer;
+    outline: none;
+}
+
+.mdc-snackbar__dismiss:hover {
+    opacity: 0.8;
+}
+
+/* Snackbar variants - Material Design 3 */
+.mdc-snackbar--success .mdc-snackbar__surface {
+    background-color: var(--status-completed-bg, #4caf50);
+    color: white;
+}
+
+.mdc-snackbar--warning .mdc-snackbar__surface {
+    background-color: var(--status-not-started-bg, #ffeb3b);
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.mdc-snackbar--error .mdc-snackbar__surface {
+    background-color: var(--mdc-theme-error, #b00020);
+    color: white;
+}
+
+.mdc-snackbar--info .mdc-snackbar__surface {
+    background-color: var(--status-in-progress-bg, #2196f3);
+    color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+    .mdc-snackbar__surface {
+        min-width: 90vw;
+        max-width: 90vw;
+    }
+}

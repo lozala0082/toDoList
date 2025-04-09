@@ -1,0 +1,141 @@
+/**
+ * Task Manager - Cards Component
+ * Styles for card components and variants
+ */
+
+/* Base card styles */
+.mdc-card {
+    background-color: var(--mdc-theme-surface);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-1);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    overflow: hidden;
+    position: relative;
+    transition: box-shadow var(--transition-fast);
+}
+
+.mdc-card:hover {
+    box-shadow: var(--shadow-2);
+}
+
+/* Card with outline instead of shadow */
+.mdc-card--outlined {
+    box-shadow: none;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.mdc-card--outlined:hover {
+    box-shadow: none;
+}
+
+/* Card sections */
+.mdc-card__primary {
+    padding: var(--spacing-md);
+}
+
+.mdc-card__secondary {
+    padding: 0 var(--spacing-md) var(--spacing-md);
+}
+
+/* Card title */
+.mdc-card__title {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+/* Card subtitle */
+.mdc-card__subtitle {
+    margin: var(--spacing-xs) 0 0;
+    font-size: var(--font-size-sm);
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* Card content */
+.mdc-card__content {
+    padding: var(--spacing-md);
+}
+
+/* Card actions */
+.mdc-card__actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: 52px;
+    padding: var(--spacing-sm);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Card action buttons */
+.mdc-card__action-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    box-sizing: border-box;
+    flex-grow: 1;
+    justify-content: flex-start;
+}
+
+/* Card action icons */
+.mdc-card__action-icons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    box-sizing: border-box;
+    justify-content: flex-end;
+}
+
+/* Card media */
+.mdc-card__media {
+    position: relative;
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.mdc-card__media--16-9 {
+    padding-top: 56.25%;
+}
+
+.mdc-card__media--square {
+    padding-top: 100%;
+}
+
+/* Specific card types */
+.login-card {
+    max-width: 400px;
+    margin: var(--spacing-xxl) auto;
+}
+
+.stat-card {
+    background-color: var(--mdc-theme-surface);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-1);
+    text-align: center;
+    min-width: 120px;
+    margin: var(--spacing-sm);
+    flex: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .mdc-card {
+        padding: var(--spacing-sm);
+    }
+    
+    .mdc-card__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .mdc-card__action-buttons,
+    .mdc-card__action-icons {
+        justify-content: center;
+        margin-bottom: var(--spacing-sm);
+    }
+}

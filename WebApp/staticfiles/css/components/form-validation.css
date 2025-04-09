@@ -1,0 +1,206 @@
+/**
+ * Task Manager - Form Validation Component
+ * Styles for form validation states and error messages
+ */
+
+/* Error message list */
+.errorlist {
+    color: var(--mdc-theme-error);
+    font-size: var(--font-size-xs);
+    margin-top: 4px;
+    margin-left: 16px;
+    list-style: none;
+    padding: 0;
+    animation: errorFadeIn 0.3s ease-in-out;
+}
+
+@keyframes errorFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Error message item */
+.errorlist span {
+    display: block;
+    margin-bottom: 2px;
+}
+
+/* Invalid field highlighting */
+.field-invalid .mdc-text-field,
+.field-invalid .mdc-select,
+.field-invalid input[type="date"],
+.field-invalid input[type="file"] {
+    --mdc-theme-primary: var(--mdc-theme-error);
+    border-color: var(--mdc-theme-error);
+}
+
+.field-invalid .mdc-text-field--outlined .mdc-notched-outline__leading,
+.field-invalid .mdc-text-field--outlined .mdc-notched-outline__notch,
+.field-invalid .mdc-text-field--outlined .mdc-notched-outline__trailing,
+.field-invalid .mdc-select--outlined .mdc-notched-outline__leading,
+.field-invalid .mdc-select--outlined .mdc-notched-outline__notch,
+.field-invalid .mdc-select--outlined .mdc-notched-outline__trailing {
+    border-color: var(--mdc-theme-error) !important;
+}
+
+.field-invalid .mdc-floating-label,
+.field-invalid .mdc-select__dropdown-icon {
+    color: var(--mdc-theme-error) !important;
+}
+
+/* Valid field highlighting */
+.field-valid .mdc-text-field--outlined .mdc-notched-outline__leading,
+.field-valid .mdc-text-field--outlined .mdc-notched-outline__notch,
+.field-valid .mdc-text-field--outlined .mdc-notched-outline__trailing,
+.field-valid .mdc-select--outlined .mdc-notched-outline__leading,
+.field-valid .mdc-select--outlined .mdc-notched-outline__notch,
+.field-valid .mdc-select--outlined .mdc-notched-outline__trailing {
+    border-color: var(--status-completed-bg) !important;
+}
+
+/* Required field indicator */
+.required-field .mdc-floating-label::after {
+    content: " *";
+    color: var(--mdc-theme-error);
+}
+
+/* Password strength indicator */
+.password-strength-meter {
+    height: 4px;
+    width: 100%;
+    margin-top: 8px;
+    border-radius: 2px;
+    background-color: #e0e0e0;
+    overflow: hidden;
+}
+
+.password-strength-meter-fill {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.password-strength-meter-fill.strength-1 {
+    width: 25%;
+    background-color: #f44336; /* Red - Very weak */
+}
+
+.password-strength-meter-fill.strength-2 {
+    width: 50%;
+    background-color: #ff9800; /* Orange - Weak */
+}
+
+.password-strength-meter-fill.strength-3 {
+    width: 75%;
+    background-color: #ffc107; /* Amber - Medium */
+}
+
+.password-strength-meter-fill.strength-4 {
+    width: 100%;
+    background-color: #4caf50; /* Green - Strong */
+}
+
+.password-strength-text {
+    font-size: var(--font-size-xs);
+    margin-top: 4px;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* Form validation message */
+.form-validation-message {
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+}
+
+.form-validation-message--error {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: var(--mdc-theme-error);
+    border-left: 4px solid var(--mdc-theme-error);
+}
+
+.form-validation-message--warning {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: #e65100;
+    border-left: 4px solid #ff9800;
+}
+
+.form-validation-message--success {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #2e7d32;
+    border-left: 4px solid #4caf50;
+}
+
+.form-validation-message__icon {
+    margin-right: var(--spacing-sm);
+    font-size: 20px;
+}
+
+/* Form field validation icon */
+.field-validation-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    z-index: 1;
+}
+
+.field-validation-icon--valid {
+    color: var(--status-completed-bg);
+}
+
+.field-validation-icon--invalid {
+    color: var(--mdc-theme-error);
+}
+
+/* Real-time validation message */
+.validation-message {
+    font-size: var(--font-size-xs);
+    margin-top: 4px;
+    margin-left: 16px;
+    transition: all 0.3s ease;
+}
+
+.validation-message--error {
+    color: var(--mdc-theme-error);
+}
+
+.validation-message--warning {
+    color: #e65100;
+}
+
+.validation-message--info {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .errorlist {
+        font-size: 10px;
+        margin-left: 8px;
+    }
+    
+    .form-validation-message {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 12px;
+    }
+    
+    .form-validation-message__icon {
+        font-size: 16px;
+    }
+    
+    .field-validation-icon {
+        font-size: 16px;
+        right: 8px;
+    }
+}

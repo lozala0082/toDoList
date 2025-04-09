@@ -1,0 +1,163 @@
+/**
+ * Task Manager - Home Page Styles
+ * Specific styles for the dashboard/home page
+ */
+
+/* Dashboard overview */
+.dashboard-overview {
+    margin-bottom: var(--spacing-xl);
+}
+
+/* Welcome message */
+.welcome-message {
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    padding-top: var(--spacing-sm);
+    text-align: center;
+}
+
+/* Dashboard stats */
+.dashboard-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    background-color: var(--mdc-theme-surface);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-1);
+    text-align: center;
+    min-width: 120px;
+    margin: var(--spacing-sm);
+    flex: 1;
+}
+
+.stat-card__value {
+    font-size: var(--font-size-xxl);
+    font-weight: 500;
+    color: var(--mdc-theme-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-card__label {
+    font-size: var(--font-size-sm);
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* Progress overview */
+.progress-overview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.progress-overview__chart {
+    width: 120px;
+    height: 120px;
+    margin-bottom: var(--spacing-md);
+}
+
+.progress-overview__label {
+    font-size: var(--font-size-md);
+    color: rgba(0, 0, 0, 0.87);
+    text-align: center;
+}
+
+/* Assignment sections */
+.assignment-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* Assignment section */
+.assignment-section {
+    background-color: var(--mdc-theme-surface);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-1);
+}
+
+.assignment-section h3 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    color: var(--mdc-theme-primary);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: var(--spacing-sm);
+}
+
+/* Empty section message */
+.empty-section-message {
+    padding: var(--spacing-md);
+    text-align: center;
+    color: rgba(0, 0, 0, 0.6);
+    font-style: italic;
+}
+
+/* Create new assignment button */
+.create-assignment-button {
+    display: block;
+    margin: var(--spacing-lg) auto;
+    text-align: center;
+}
+
+/* Cat mascot positioning on home page */
+.home-page .cat-mascot {
+    position: absolute;
+    top: 80px;
+    right: 20px;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+    .assignment-sections {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .assignment-section {
+        flex: 1;
+        min-width: 250px;
+    }
+    
+    .dashboard-stats {
+        justify-content: center;
+    }
+    
+    .stat-card {
+        min-width: 150px;
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 767px) {
+    .welcome-message {
+        margin-top: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .dashboard-stats {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .stat-card {
+        width: 100%;
+        max-width: 250px;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .home-page .cat-mascot {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin: var(--spacing-md) auto;
+    }
+}

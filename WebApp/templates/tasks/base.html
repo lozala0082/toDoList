@@ -68,10 +68,10 @@
             /* Cat mascot styling */
             .cat-mascot {
                 position: fixed;
-                bottom: 16px;
-                right: 16px;
-                width: 64px;
-                height: 64px;
+                bottom: 20px;
+                right: 20px;
+                width: 100px;
+                height: 100px;
                 z-index: 90;
                 filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06));
                 transition: transform 0.3s ease;
@@ -90,14 +90,14 @@
             /* Message bubble styling */
             .cat-message-bubble {
                 position: absolute;
-                bottom: 70px;
+                bottom: 110px;
                 right: 0;
                 background-color: white;
-                border-radius: 12px;
-                padding: 12px 16px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                width: 220px;
-                font-size: 14px;
+                border-radius: 16px;
+                padding: 16px 20px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+                width: 280px;
+                font-size: 16px;
                 color: #333;
                 opacity: 0;
                 transform: translateY(10px);
@@ -119,41 +119,6 @@
             .cat-message-bubble.show-message {
                 opacity: 1;
                 transform: translateY(0);
-            }
-
-            /* Style for snackbar messages */
-            .mdc-snackbar {
-                z-index: 100;
-            }
-
-            /* Default snackbar styling */
-            .mdc-snackbar .mdc-snackbar__surface {
-                background-color: #333333;
-                color: white;
-            }
-
-            /* Success message styling */
-            .mdc-snackbar.success .mdc-snackbar__surface {
-                background-color: #4caf50;
-                color: white;
-            }
-
-            /* Error message styling */
-            .mdc-snackbar.error .mdc-snackbar__surface {
-                background-color: #f44336;
-                color: white;
-            }
-
-            /* Warning message styling */
-            .mdc-snackbar.warning .mdc-snackbar__surface {
-                background-color: #ff9800;
-                color: black;
-            }
-
-            /* Info message styling */
-            .mdc-snackbar.info .mdc-snackbar__surface {
-                background-color: #2196f3;
-                color: white;
             }
 
             /* Minimal styling for hidden fallback messages */
@@ -266,6 +231,7 @@
 
         {% load static %}
         <script src="{% static 'js/cat_mascots.js' %}"></script>
+        <script type="module" src="{% static 'js/main.js' %}"></script>
         <script>
             // Auto-init all components
             window.mdc.autoInit();
@@ -291,41 +257,7 @@
                     mdc.topAppBar.MDCTopAppBar.attachTo(topAppBarElement);
                 }
 
-                // Initialize snackbar
-                const snackbarElement = document.querySelector('.mdc-snackbar');
-                if (snackbarElement) {
-                    const snackbar = mdc.snackbar.MDCSnackbar.attachTo(snackbarElement);
-
-                    // Configure snackbar
-                    snackbar.timeoutMs = 5000; // Show for 5 seconds
-                    snackbar.closeOnEscape = true; // Allow closing with Escape key
-
-                    // Show messages in snackbar if any
-                    const fallbackMessages = document.querySelectorAll('.message-fallback');
-                    if (fallbackMessages.length > 0) {
-                        // Get the first message
-                        const firstMessage = fallbackMessages[0];
-                        const messageText = firstMessage.textContent.trim();
-                        const messageType = firstMessage.classList.contains('success') ? 'success' :
-                                          firstMessage.classList.contains('error') ? 'error' :
-                                          firstMessage.classList.contains('warning') ? 'warning' :
-                                          firstMessage.classList.contains('info') ? 'info' : '';
-
-                        // Set snackbar label text
-                        snackbarElement.querySelector('.mdc-snackbar__label').textContent = messageText;
-
-                        // Add appropriate class based on message type
-                        snackbarElement.classList.remove('success', 'error', 'warning', 'info');
-                        if (messageType) {
-                            snackbarElement.classList.add(messageType);
-                        }
-
-                        // Show the snackbar
-                        snackbar.open();
-
-                        console.log('Showing message in snackbar:', messageText);
-                    }
-                }
+                // Snackbar is initialized via the snackbar.js component
             });
         </script>
         {% block extra_scripts %}{% endblock %}

@@ -1,6 +1,6 @@
 /**
- * Cat Mascot Interactions
- * Handles click events and messages for the cat mascots
+ * Task Manager - Cat Mascots Component
+ * Handles interactions with the cat mascot elements
  */
 
 // Motivational messages for the Lockedin Cat
@@ -31,8 +31,10 @@ const bosscatMessages = [
     "This isn't nap time, let's get moving!"
 ];
 
-// Initialize cat mascot functionality
-document.addEventListener('DOMContentLoaded', function() {
+/**
+ * Initialize cat mascot functionality
+ */
+function initializeCatMascots() {
     // Find all cat mascots
     const catMascots = document.querySelectorAll('.cat-mascot');
 
@@ -50,36 +52,41 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add click event listener if not already added
         if (!mascot.hasAttribute('data-initialized')) {
             mascot.setAttribute('data-initialized', 'true');
-
             mascot.addEventListener('click', function() {
-                // Determine which cat was clicked
-                const catType = mascot.getAttribute('data-cat-type');
-                let message = '';
+            // Determine which cat was clicked
+            const catType = mascot.getAttribute('data-cat-type');
+            let message = '';
 
-                // Select a random message based on cat type
-                if (catType === 'lockedin') {
-                    const randomIndex = Math.floor(Math.random() * lockedinCatMessages.length);
-                    message = lockedinCatMessages[randomIndex];
-                } else if (catType === 'bosscat') {
-                    const randomIndex = Math.floor(Math.random() * bosscatMessages.length);
-                    message = bosscatMessages[randomIndex];
-                }
+            // Select a random message based on cat type
+            if (catType === 'lockedin') {
+                const randomIndex = Math.floor(Math.random() * lockedinCatMessages.length);
+                message = lockedinCatMessages[randomIndex];
+            } else if (catType === 'bosscat') {
+                const randomIndex = Math.floor(Math.random() * bosscatMessages.length);
+                message = bosscatMessages[randomIndex];
+            }
 
-                // Display the message
-                messageBubble.textContent = message;
-                messageBubble.style.display = 'block';
+            // Display the message
+            messageBubble.textContent = message;
+            messageBubble.style.display = 'block';
 
-                // Add animation class
-                messageBubble.classList.add('show-message');
+            // Add animation class
+            messageBubble.classList.add('show-message');
 
-                // Hide the message after a delay
+            // Hide the message after a delay
+            setTimeout(() => {
+                messageBubble.classList.remove('show-message');
                 setTimeout(() => {
-                    messageBubble.classList.remove('show-message');
-                    setTimeout(() => {
-                        messageBubble.style.display = 'none';
-                    }, 500); // Wait for fade out animation to complete
-                }, 8000); // Show message for 8 seconds
+                    messageBubble.style.display = 'none';
+                }, 500); // Wait for fade out animation to complete
+            }, 8000); // Show message for 8 seconds
             });
         }
     });
-});
+}
+
+// Initialize when the DOM is loaded
+document.addEventListener('DOMContentLoaded', initializeCatMascots);
+
+// Export for use in other modules
+export { initializeCatMascots };
