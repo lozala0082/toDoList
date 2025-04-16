@@ -152,11 +152,21 @@
                 background-color: #2196f3; /* Blue */
                 color: white;
             }
+
+            /* Hide header and adjust content for login page */
+            body.is-login-page .mdc-top-app-bar {
+                display: none;
+            }
+
+            body.is-login-page .main-content-area {
+                padding-top: 0;
+                margin-top: 0;
+            }
         </style>
 
         {% block extra_head %}{% endblock %}
     </head>
-    <body>
+    <body class="{% if request.resolver_match.url_name == 'login' %}is-login-page{% endif %}">
         <header class="mdc-top-app-bar">
             <div class="mdc-top-app-bar__row">
                 <section

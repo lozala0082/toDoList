@@ -10,6 +10,8 @@ from django.http import JsonResponse
 import json
 from .models import Assignment, SubTask
 from .forms import AssignmentForm, AssignmentStatusForm, UserRegistrationForm, SubTaskFormSet, NewSubTaskFormSet
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login
 
 def is_admin(user):
     return user.is_staff
@@ -334,3 +336,24 @@ def update_subtask(request, pk):
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                # Set session expiry based on remember me checkbox
+                if request.POST.get('remember_me'):
+                    # Session will last for 2 weeks
+                    request.session.set_expiry(1209600)
+                else:
+                    # Session will end when browser closes
+                    request.session.set_expiry(0)
+                return redirect('home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'tasks/login.html', {'form': form})

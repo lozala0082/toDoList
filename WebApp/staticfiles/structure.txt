@@ -1,0 +1,18 @@
+static/
+├── css/
+│   └── style.css
+├── js/
+│   ├── main.js
+│   └── charts.js
+├── images/
+│   ├── default_avatar.png
+│   ├── logo.png
+│   └── icons/
+│       ├── dashboard.svg
+│       ├── tasks.svg
+│       ├── projects.svg
+│       ├── calendar.svg
+│       ├── team.svg
+│       └── settings.svg
+└── fonts/
+    └── Inter/
