@@ -7,111 +7,179 @@
 <style>
     body {
         margin: 0;
-        padding: 40px;  /* Added padding to the body */
+        padding: 40px;
+        background-color: #a9b0bc; /* Gray background color */
     }
 
     .login-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: calc(100vh - 80px); /* Adjusted for body padding */
-        background-color: #f5f5f5;
+        min-height: calc(100vh - 80px);
         margin: 0 auto;
-        max-width: 1200px; /* Maximum width for larger screens */
-        border-radius: 12px; /* Optional: rounded corners for the container */
+        max-width: 1200px;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #e6f3ff 0%, #baddff 100%); /* Light blue gradient expanded to container */
     }
 
     .login-card {
-        background: white;
-        border-radius: 8px;
-        padding: 40px;  /* Increased padding */
+        display: flex;
         width: 100%;
-        max-width: 400px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin: 40px;  /* Added margin around the card */
+        height: 100%;
     }
 
-    .login-form-container h1 {
+    .login-form-side {
+        width: 50%;
+        padding: 50px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .login-image-side {
+        width: 50%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .logo {
+        margin-bottom: 40px;
+        font-weight: bold;
         font-size: 24px;
-        margin-bottom: 30px;  /* Increased margin */
+    }
+
+    .form-header {
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+
+    .form-header h1 {
+        font-size: 28px;
+        margin-bottom: 8px;
         color: #333;
-        text-align: center;
+        font-weight: 600;
+    }
+
+    .form-header p {
+        color: #666;
+        font-size: 16px;
+        margin-top: 0;
     }
 
     .form-field-container {
-        margin-bottom: 20px;  /* Increased margin */
+        margin-bottom: 20px;
+    }
+
+    .form-field-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #555;
     }
 
     .form-field-container input {
         width: 100%;
-        padding: 12px;  /* Increased padding */
+        padding: 12px;
         border: 1px solid #ddd;
-        border-radius: 4px;
+        border-radius: 8px;
         font-size: 14px;
+        background-color: white;
     }
 
-    .remember-me {
-        display: flex;
-        align-items: center;
-        margin-bottom: 20px;  /* Increased margin */
-        padding: 0 4px;  /* Added small padding */
-    }
-
-    .remember-me input[type="checkbox"] {
-        margin-right: 10px;  /* Increased margin */
+    .form-field-container input:focus {
+        outline: none;
+        border-color: #4a90e2;
     }
 
     .login-button {
-        background-color: #4CAF50;
-        color: white;
+        background-color: #ffcc33; /* Yellow button */
+        color: #333;
         border: none;
-        padding: 12px;  /* Increased padding */
-        border-radius: 4px;
+        padding: 14px;
+        border-radius: 8px;
         font-size: 16px;
         cursor: pointer;
         width: 100%;
-        margin-bottom: 20px;  /* Increased margin */
+        margin-top: 10px;
+        margin-bottom: 20px;
+        font-weight: 600;
     }
 
     .login-button:hover {
-        background-color: #45a049;
+        background-color: #efbd24;
     }
 
-    .register-link {
-        text-align: center;
+    .login-footer {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
         color: #666;
-        padding: 10px 0;  /* Added padding */
     }
 
-    .register-link a {
-        color: #4CAF50;
+    .login-footer a {
+        color: #666;
         text-decoration: none;
     }
 
-    .register-link a:hover {
+    .login-footer a:hover {
         text-decoration: underline;
     }
 
-    .error-message {
-        color: red;
-        margin-bottom: 15px;
-        font-size: 14px;
+    .close-button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
+        color: #333;
+        font-size: 20px;
+        cursor: pointer;
     }
 
     /* Responsive adjustments */
+    @media (max-width: 992px) {
+        .login-card {
+            flex-direction: column;
+        }
+
+        .login-form-side, .login-image-side {
+            width: 100%;
+        }
+
+        .login-image-side {
+            display: none; /* Hide the image on smaller screens */
+        }
+    }
+
     @media (max-width: 768px) {
         body {
-            padding: 20px;  /* Smaller padding on mobile */
+            padding: 20px;
         }
 
-        .login-card {
-            margin: 20px;  /* Smaller margin on mobile */
-            padding: 30px;  /* Smaller padding on mobile */
+        .login-form-side {
+            padding: 30px;
         }
+    }
 
-        .login-container {
-            min-height: calc(100vh - 40px);  /* Adjusted for smaller body padding */
-        }
+    /* Error message styling */
+    .error-message {
+        color: #e74c3c;
+        margin-top: 5px;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+
+    /* Remember me checkbox styling */
+    .remember-me {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .remember-me input[type="checkbox"] {
+        margin-right: 10px;
     }
 </style>
 {% endblock %}
@@ -119,8 +187,15 @@
 {% block content %}
 <div class="login-container">
     <div class="login-card">
-        <div class="login-form-container">
-            <h1>Sign In</h1>
+        <!-- Left side with form -->
+        <div class="login-form-side">
+            <div class="logo">ToDoList</div>
+            
+            <div class="form-header">
+                <h1>Sign In</h1>
+                <p>Welcome back to your task manager</p>
+            </div>
+            
             <form method="POST" novalidate>
                 {% csrf_token %}
                 
@@ -133,8 +208,9 @@
                 {% endif %}
 
                 <div class="form-field-container">
-                    <input type="text" name="username" placeholder="Username" required 
-                           id="{{ form.username.auto_id }}" value="{{ form.username.value|default:'' }}">
+                    <label class="form-field-label">Username</label>
+                    <input type="text" name="username" placeholder="Username" required
+                          id="{{ form.username.auto_id }}" value="{{ form.username.value|default:'' }}">
                     {% if form.username.errors %}
                     <div class="error-message">
                         {% for error in form.username.errors %}{{ error }}{% endfor %}
@@ -143,8 +219,9 @@
                 </div>
 
                 <div class="form-field-container">
+                    <label class="form-field-label">Password</label>
                     <input type="password" name="password" placeholder="Password" required
-                           id="{{ form.password.auto_id }}" value="{{ form.password.value|default:'' }}">
+                          id="{{ form.password.auto_id }}" value="{{ form.password.value|default:'' }}">
                     {% if form.password.errors %}
                     <div class="error-message">
                         {% for error in form.password.errors %}{{ error }}{% endfor %}
@@ -158,11 +235,18 @@
                 </div>
 
                 <button type="submit" class="login-button">Sign In</button>
-
-                <div class="register-link">
-                    Don't have an account? <a href="{% url 'register' %}">Create Account</a>
-                </div>
             </form>
+            
+            <div class="login-footer">
+                <span>Don't have an account? <a href="{% url 'register' %}">Create Account</a></span>
+                
+            </div>
+        </div>
+        
+        <!-- Right side with image -->
+        <div class="login-image-side">
+            <img src="{% static 'images/funnycat.png' %}" alt="FunnyCat" style="width: 100%; height: 100%; object-fit: cover;">
+            <button class="close-button">×</button>
         </div>
     </div>
 </div>
@@ -171,22 +255,7 @@
 {% block extra_scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize Material Design Components text fields
-        document.querySelectorAll(".mdc-text-field").forEach(function(textField) {
-            if (textField) {
-                mdc.textField.MDCTextField.attachTo(textField);
-            }
-        });
-
-        // Ensure labels are properly positioned if fields have values
-        document.querySelectorAll('.mdc-text-field__input').forEach(function(input) {
-            if (input.value) {
-                const label = input.closest('.mdc-text-field').querySelector('.mdc-floating-label');
-                if (label) {
-                    label.classList.add('mdc-floating-label--float-above');
-                }
-            }
-        });
+        // Any initialization for form elements if needed
     });
 </script>
 {% endblock %}
